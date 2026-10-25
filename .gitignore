@@ -1,5 +1,6 @@
 .env
 data/private/
+data/berka/
 node_modules/
 __pycache__/
 .venv/
