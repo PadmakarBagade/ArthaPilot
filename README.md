@@ -265,4 +265,4 @@ This is currently a personal portfolio project. Suggestions and issues are welco
 
 Released under the MIT License. See `LICENSE`.
 
-Built by **<Your Name>**. Connect on [LinkedIn](https://www.linkedin.com/in/<your-handle>) or [GitHub](https://github.com/<your-username>).
+Built by **<Your Name>**. Connect on [LinkedIn](https://www.linkedin.com/in/padmakarbagade2005) or [GitHub](https://github.com/PadmakarBagade).
