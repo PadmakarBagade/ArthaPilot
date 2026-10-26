@@ -13,28 +13,55 @@ def _first(row: dict, names: tuple[str, ...]) -> str:
 
 
 def _parse_date(value: str) -> date:
-    for pattern in ("%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y", "%m/%d/%Y"):
+    value = value.strip()
+    for pattern in (
+        "%Y-%m-%d",
+        "%Y/%m/%d",
+        "%d/%m/%Y",
+        "%d-%m-%Y",
+        "%d.%m.%Y",
+        "%m/%d/%Y",
+        "%Y-%m-%d %H:%M:%S",
+    ):
         try:
-            return datetime.strptime(value.strip(), pattern).date()
+            return datetime.strptime(value, pattern).date()
         except ValueError:
             continue
+    try:
+        return datetime.fromisoformat(value).date()
+    except ValueError:
+        pass
     raise ValueError(f"Invalid transaction date: {value}")
+
+
+def _number(value: str) -> float:
+    normalized = value.strip().replace(",", "").replace("₹", "").replace("Rs.", "")
+    if normalized.startswith("(") and normalized.endswith(")"):
+        normalized = "-" + normalized[1:-1]
+    return float(normalized.replace("CR", "").replace("DR", "").strip())
 
 
 def _amount_paise(row: dict) -> int:
     amount = _first(row, ("amount_paise",))
     if amount:
-        return int(float(amount))
+        return int(_number(amount))
     amount = _first(row, ("amount", "value", "transaction amount"))
     debit = _first(row, ("debit", "withdrawal", "debit amount"))
     credit = _first(row, ("credit", "deposit", "credit amount"))
     if debit or credit:
-        if debit:
-            return -round(float(debit.replace(",", "").replace("₹", "")) * 100)
-        return round(float(credit.replace(",", "").replace("₹", "")) * 100)
+        if debit and _number(debit) != 0:
+            return -round(abs(_number(debit)) * 100)
+        if credit and _number(credit) != 0:
+            return round(abs(_number(credit)) * 100)
+        return 0
     if not amount:
         raise ValueError("Transaction row has no amount")
-    return round(float(amount.replace(",", "").replace("₹", "")) * 100)
+    return round(_number(amount) * 100)
+
+
+def _is_balance_row(row: dict) -> bool:
+    values = " ".join(str(value).strip().lower() for value in row.values())
+    return any(marker in values for marker in ("opening balance", "closing balance", "opening bal", "closing bal"))
 
 
 def clean_transactions(
@@ -43,6 +70,8 @@ def clean_transactions(
     cleaned: list[dict] = []
     seen: set[str] = set()
     for row in rows:
+        if _is_balance_row(row):
+            continue
         transaction_date = _parse_date(_first(row, ("date", "transaction date", "txn_date")))
         description = _first(row, ("raw_description", "description", "narration", "details"))
         account_id = _first(row, ("account_id", "account", "account number")) or "default"

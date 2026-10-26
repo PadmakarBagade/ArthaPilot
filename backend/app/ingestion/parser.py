@@ -12,7 +12,10 @@ def _read_text(file: IO[bytes] | IO[str]) -> str:
 
 
 def parse_csv(file: IO[bytes] | IO[str]) -> list[dict[str, str]]:
-    return list(csv.DictReader(io.StringIO(_read_text(file))))
+    reader = csv.DictReader(io.StringIO(_read_text(file)))
+    if not reader.fieldnames:
+        raise ValueError("CSV upload has no header row")
+    return [dict(row) for row in reader]
 
 
 def parse_file(file: IO[bytes] | IO[str], filename: str) -> list[dict[str, str]]:
