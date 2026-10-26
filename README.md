@@ -3,10 +3,10 @@
 **Your Financial Health Copilot.** ArthaPilot brings your bank accounts, cards, loans and investments into one clear picture, predicts upcoming cash-flow trouble, and tells you what to do next, with the expected impact of every suggestion.
 
 ![Status](https://img.shields.io/badge/status-in%20development-orange)
-![Phase](https://img.shields.io/badge/phase-0%20complete-blue)
+![Phase](https://img.shields.io/badge/phase-1%20complete-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-> **Project status:** Phase 0 (project skeleton) is complete. Features below marked "Planned" are not built yet. See the [Roadmap](#roadmap) for exact progress. This README is updated at the end of every phase.
+> **Project status:** Phase 1 (data layer) is complete. Features below marked "Planned" are not built yet. See the [Roadmap](#roadmap) for exact progress. This README is updated at the end of every phase.
 
 ---
 
@@ -50,7 +50,7 @@ Status key: Done, In progress, Planned.
 | Feature | Status |
 |---|---|
 | Runnable backend and frontend skeleton, Docker, CI | Done |
-| Three-layer data pipeline (synthetic, Berka, real statements) | Planned |
+| Three-layer data pipeline (synthetic, Berka, real statements) | Done |
 | Transaction categorisation and recurring-bill detection | Planned |
 | Financial Health Score (0 to 100) with reasons | Planned |
 | Confidence meter with reasons and "how to improve" | Planned |
