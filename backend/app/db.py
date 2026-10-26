@@ -13,6 +13,10 @@ class Base(DeclarativeBase):
     pass
 
 
+def create_tables(target_engine=engine) -> None:
+    Base.metadata.create_all(bind=target_engine)
+
+
 def get_db():
     db = SessionLocal()
     try:
