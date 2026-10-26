@@ -1,0 +1,2 @@
+id,user_id,type,principal_paise,outstanding_paise,emi_paise,rate_apr,tenure_left_months,next_due_date
+priya-loan-1,priya,home,608000000,380000000,3800000,10.5,36,2024-01-05

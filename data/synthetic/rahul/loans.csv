@@ -1,2 +1,2 @@
 id,user_id,type,principal_paise,outstanding_paise,emi_paise,rate_apr,tenure_left_months,next_due_date
-rahul-car-loan,rahul,vehicle,80000000,52000000,425000,10.5,36,2024-01-05
+rahul-loan-1,rahul,vehicle,68000000,42500000,425000,10.5,36,2024-01-05

@@ -1,0 +1,3 @@
+id,user_id,type,principal_paise,outstanding_paise,emi_paise,rate_apr,tenure_left_months,next_due_date
+meera-loan-1,meera,home,400000000,250000000,2500000,10.5,36,2024-01-05
+meera-loan-2,meera,personal,240000000,150000000,1500000,16.0,24,2024-01-05
