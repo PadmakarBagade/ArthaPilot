@@ -104,6 +104,7 @@ ArthaPilot uses three data layers that all feed one common transaction format, s
 Honest notes: the Berka dataset is from a Czech bank and is not in rupees, so it tests cash-flow logic rather than merchant-name categorisation. Synthetic data is used only for scenario testing, never as proof of accuracy. Accuracy numbers come from real and public data only.
 
 No real user data is ever committed to this repository.
+Real-statement validation is planned for later.
 
 ## Tech Stack
 
@@ -200,8 +201,8 @@ arthapilot/
 | Phase | Goal | Status |
 |---|---|---|
 | 0 | Project skeleton: backend, frontend, Docker, CI | Done |
-| 1 | Data layer: personas, Berka loader, upload and cleaning | Next |
-| 2 | Categorisation and recurring/income detection | Planned |
+| 1 | Data layer: personas, Berka loader, upload and cleaning | Done |
+| 2 | Categorisation and recurring/income detection | Next |
 | 3 | Health metrics and 0 to 100 score | Planned |
 | 4 | Data-quality and confidence engine | Planned |
 | 5 | Cash-flow forecast, gap detection, stress tests, backtests | Planned |
