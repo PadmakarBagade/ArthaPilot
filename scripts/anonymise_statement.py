@@ -8,8 +8,10 @@ from app.ingestion.anonymise import anonymise_rows
 def anonymise_statement(source: Path, destination: Path) -> None:
     with source.open(encoding="utf-8", newline="") as handle:
         rows = anonymise_rows(list(csv.DictReader(handle)))
+    if not rows:
+        raise ValueError("Statement has no data rows")
     with destination.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]) if rows else [])
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
 

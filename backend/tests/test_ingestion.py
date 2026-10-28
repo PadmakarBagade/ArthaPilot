@@ -52,7 +52,12 @@ def test_cleaning_supports_split_credit_and_debit_columns():
 
 
 def test_anonymise_masks_personal_data():
-    value = anonymise_text("Call +919876543210 or email person@example.com, account 1234 5678")
-    assert "[PHONE]" in value
-    assert "[EMAIL]" in value
-    assert "[ACCOUNT]" in value
+    value = anonymise_text(
+        "Name: Rahul Sharma, call +919876543210, email person@example.com, "
+        "UPI rahul@okbank, account 1234 5678"
+    )
+    assert "PERSON_1" in value
+    assert "PHONE_1" in value
+    assert "EMAIL_1" in value
+    assert "UPI_ID_1" in value
+    assert "ACCOUNT_1" in value
