@@ -1,0 +1,258 @@
+raw_description,true_category,is_recurring
+ACT FIBERNET INTERNET,utilities,True
+AIRTEL MOBILE BILL,utilities,True
+AMZN PAY IN,shopping,False
+CAR EMI,debt,True
+CLIENT PAYMENT,income,True
+CREDIT CARD PAYMENT,debt,True
+DUPLICATE GROCERY CHARGE,groceries,False
+ELECTRICITY BILL,utilities,True
+EMERGENCY LAPTOP PURCHASE,shopping,False
+FITNESS FIRST GYM MEMBERSHIP,subscriptions,True
+HOME LOAN EMI,debt,True
+MUTUAL FUND SIP,investments,True
+NETFLIX.COM,subscriptions,True
+PERSONAL LOAN EMI,debt,True
+RENT PAYMENT,housing,True
+SALARY CREDIT,income,True
+SPOTIFY,subscriptions,True
+SWIGGY ORDER 1088,food_delivery,False
+SWIGGY ORDER 1144,food_delivery,False
+SWIGGY ORDER 1164,food_delivery,False
+SWIGGY ORDER 1453,food_delivery,False
+SWIGGY ORDER 2013,food_delivery,False
+SWIGGY ORDER 2139,food_delivery,False
+SWIGGY ORDER 2743,food_delivery,False
+SWIGGY ORDER 2827,food_delivery,False
+SWIGGY ORDER 3621,food_delivery,False
+SWIGGY ORDER 4636,food_delivery,False
+SWIGGY ORDER 5062,food_delivery,False
+SWIGGY ORDER 5097,food_delivery,False
+SWIGGY ORDER 5435,food_delivery,False
+SWIGGY ORDER 5577,food_delivery,False
+SWIGGY ORDER 5838,food_delivery,False
+SWIGGY ORDER 6147,food_delivery,False
+SWIGGY ORDER 6514,food_delivery,False
+SWIGGY ORDER 7126,food_delivery,False
+SWIGGY ORDER 7216,food_delivery,False
+SWIGGY ORDER 7621,food_delivery,False
+SWIGGY ORDER 8462,food_delivery,False
+SWIGGY ORDER 8990,food_delivery,False
+SWIGGY ORDER 9085,food_delivery,False
+SWIGGY ORDER 9126,food_delivery,False
+SWIGGY ORDER 9524,food_delivery,False
+SWIGGY ORDER 9610,food_delivery,False
+SWIGGY ORDER 9739,food_delivery,False
+SWIGGY ORDER 9890,food_delivery,False
+SWIGGY ORDER 9899,food_delivery,False
+SWIGGY*ORDER 1279,food_delivery,False
+SWIGGY*ORDER 1445,food_delivery,False
+SWIGGY*ORDER 1525,food_delivery,False
+SWIGGY*ORDER 1654,food_delivery,False
+SWIGGY*ORDER 1786,food_delivery,False
+SWIGGY*ORDER 2006,food_delivery,False
+SWIGGY*ORDER 2129,food_delivery,False
+SWIGGY*ORDER 2291,food_delivery,False
+SWIGGY*ORDER 2654,food_delivery,False
+SWIGGY*ORDER 2688,food_delivery,False
+SWIGGY*ORDER 2982,food_delivery,False
+SWIGGY*ORDER 3040,food_delivery,False
+SWIGGY*ORDER 3167,food_delivery,False
+SWIGGY*ORDER 3358,food_delivery,False
+SWIGGY*ORDER 3370,food_delivery,False
+SWIGGY*ORDER 3524,food_delivery,False
+SWIGGY*ORDER 4257,food_delivery,False
+SWIGGY*ORDER 4376,food_delivery,False
+SWIGGY*ORDER 4582,food_delivery,False
+SWIGGY*ORDER 4844,food_delivery,False
+SWIGGY*ORDER 5487,food_delivery,False
+SWIGGY*ORDER 5506,food_delivery,False
+SWIGGY*ORDER 5632,food_delivery,False
+SWIGGY*ORDER 6155,food_delivery,False
+SWIGGY*ORDER 6167,food_delivery,False
+SWIGGY*ORDER 6382,food_delivery,False
+SWIGGY*ORDER 6524,food_delivery,False
+SWIGGY*ORDER 6635,food_delivery,False
+SWIGGY*ORDER 6661,food_delivery,False
+SWIGGY*ORDER 6935,food_delivery,False
+SWIGGY*ORDER 7218,food_delivery,False
+SWIGGY*ORDER 8652,food_delivery,False
+SWIGGY*ORDER 9163,food_delivery,False
+SWIGGY*ORDER 9797,food_delivery,False
+SWIGGY*ORDER 9807,food_delivery,False
+SWIGGY*ORDER 9900,food_delivery,False
+SWIGGY*ORDER 9935,food_delivery,False
+SWIGGY*ORDR 1619,food_delivery,False
+SWIGGY*ORDR 1622,food_delivery,False
+SWIGGY*ORDR 1937,food_delivery,False
+SWIGGY*ORDR 2370,food_delivery,False
+SWIGGY*ORDR 3069,food_delivery,False
+SWIGGY*ORDR 3557,food_delivery,False
+SWIGGY*ORDR 3914,food_delivery,False
+SWIGGY*ORDR 4439,food_delivery,False
+SWIGGY*ORDR 4684,food_delivery,False
+SWIGGY*ORDR 5339,food_delivery,False
+SWIGGY*ORDR 5544,food_delivery,False
+SWIGGY*ORDR 5813,food_delivery,False
+SWIGGY*ORDR 6265,food_delivery,False
+SWIGGY*ORDR 6427,food_delivery,False
+SWIGGY*ORDR 6436,food_delivery,False
+SWIGGY*ORDR 6655,food_delivery,False
+SWIGGY*ORDR 6667,food_delivery,False
+SWIGGY*ORDR 6843,food_delivery,False
+SWIGGY*ORDR 6923,food_delivery,False
+SWIGGY*ORDR 7696,food_delivery,False
+SWIGGY*ORDR 8474,food_delivery,False
+SWIGGY*ORDR 8668,food_delivery,False
+SWIGGY*ORDR 9856,food_delivery,False
+SWIGGY*ORDR 9919,food_delivery,False
+SWIGGY/ORDER 1023,food_delivery,False
+SWIGGY/ORDER 1276,food_delivery,False
+SWIGGY/ORDER 1980,food_delivery,False
+SWIGGY/ORDER 2169,food_delivery,False
+SWIGGY/ORDER 2185,food_delivery,False
+SWIGGY/ORDER 2557,food_delivery,False
+SWIGGY/ORDER 2569,food_delivery,False
+SWIGGY/ORDER 2849,food_delivery,False
+SWIGGY/ORDER 3162,food_delivery,False
+SWIGGY/ORDER 3168,food_delivery,False
+SWIGGY/ORDER 3525,food_delivery,False
+SWIGGY/ORDER 3591,food_delivery,False
+SWIGGY/ORDER 3615,food_delivery,False
+SWIGGY/ORDER 3979,food_delivery,False
+SWIGGY/ORDER 3997,food_delivery,False
+SWIGGY/ORDER 4047,food_delivery,False
+SWIGGY/ORDER 6096,food_delivery,False
+SWIGGY/ORDER 6243,food_delivery,False
+SWIGGY/ORDER 6498,food_delivery,False
+SWIGGY/ORDER 7065,food_delivery,False
+SWIGGY/ORDER 7200,food_delivery,False
+SWIGGY/ORDER 7401,food_delivery,False
+SWIGGY/ORDER 7604,food_delivery,False
+SWIGGY/ORDER 7641,food_delivery,False
+SWIGGY/ORDER 8019,food_delivery,False
+SWIGGY/ORDER 8273,food_delivery,False
+SWIGGY/ORDER 8716,food_delivery,False
+SWIGGY/ORDER 8989,food_delivery,False
+SWIGGY/ORDER 8995,food_delivery,False
+SWIGGY/ORDER 9961,food_delivery,False
+UPI-ZOMATO-1016931,food_delivery,False
+UPI-ZOMATO-1042269,food_delivery,False
+UPI-ZOMATO-1268515,food_delivery,False
+UPI-ZOMATO-1380861,food_delivery,False
+UPI-ZOMATO-2104241,food_delivery,False
+UPI-ZOMATO-2247555,food_delivery,False
+UPI-ZOMATO-2879213,food_delivery,False
+UPI-ZOMATO-2926794,food_delivery,False
+UPI-ZOMATO-4149975,food_delivery,False
+UPI-ZOMATO-4597150,food_delivery,False
+UPI-ZOMATO-4744854,food_delivery,False
+UPI-ZOMATO-4888098,food_delivery,False
+UPI-ZOMATO-4913478,food_delivery,False
+UPI-ZOMATO-5137722,food_delivery,False
+UPI-ZOMATO-5567682,food_delivery,False
+UPI-ZOMATO-5858146,food_delivery,False
+UPI-ZOMATO-5968736,food_delivery,False
+UPI-ZOMATO-7393345,food_delivery,False
+UPI-ZOMATO-7490296,food_delivery,False
+UPI-ZOMATO-8187151,food_delivery,False
+UPI-ZOMATO-9375710,food_delivery,False
+UPI-ZOMATO-9388082,food_delivery,False
+UPI-ZOMATO-9478454,food_delivery,False
+UPI-ZOMATO-9652300,food_delivery,False
+UPI-ZOMATO-9700795,food_delivery,False
+UPI-ZOMATO-9786237,food_delivery,False
+UPI-ZOMATO-9897858,food_delivery,False
+UPI-ZOMATO-9961380,food_delivery,False
+UPI/1054447/ZOMATOE,food_delivery,False
+UPI/1185159/ZOMATOE,food_delivery,False
+UPI/1687912/ZOMATOE,food_delivery,False
+UPI/1693620/ZOMATOE,food_delivery,False
+UPI/1728883/ZOMATO,food_delivery,False
+UPI/1790481/ZOMATO,food_delivery,False
+UPI/2065818/ZOMATOE,food_delivery,False
+UPI/2065883/ZOMATOE,food_delivery,False
+UPI/2117916/ZOMATO,food_delivery,False
+UPI/2211961/ZOMATO,food_delivery,False
+UPI/2413098/ZOMATOE,food_delivery,False
+UPI/2433199/ZOMATO,food_delivery,False
+UPI/2556017/ZOMATO,food_delivery,False
+UPI/2578714/ZOMATO,food_delivery,False
+UPI/2900889/ZOMATO,food_delivery,False
+UPI/3055034/ZOMATOE,food_delivery,False
+UPI/3498986/ZOMATOE,food_delivery,False
+UPI/3574764/ZOMATOE,food_delivery,False
+UPI/3628827/ZOMATO,food_delivery,False
+UPI/3746270/ZOMATOE,food_delivery,False
+UPI/3889224/ZOMATO,food_delivery,False
+UPI/4254584/ZOMATOE,food_delivery,False
+UPI/4698379/ZOMATOE,food_delivery,False
+UPI/4823498/ZOMATO,food_delivery,False
+UPI/4908534/ZOMATO,food_delivery,False
+UPI/5047795/ZOMATO,food_delivery,False
+UPI/5405095/ZOMATOE,food_delivery,False
+UPI/5663555/ZOMATO,food_delivery,False
+UPI/5663623/ZOMATOE,food_delivery,False
+UPI/5763630/ZOMATO,food_delivery,False
+UPI/5767055/ZOMATO,food_delivery,False
+UPI/5860478/ZOMATO,food_delivery,False
+UPI/6357647/ZOMATOE,food_delivery,False
+UPI/6361026/ZOMATO,food_delivery,False
+UPI/6471383/ZOMATOE,food_delivery,False
+UPI/6708456/ZOMATOE,food_delivery,False
+UPI/7073292/ZOMATOE,food_delivery,False
+UPI/7205509/ZOMATOE,food_delivery,False
+UPI/7269311/ZOMATOE,food_delivery,False
+UPI/7449461/ZOMATO,food_delivery,False
+UPI/7461925/ZOMATOE,food_delivery,False
+UPI/7609139/ZOMATOE,food_delivery,False
+UPI/7651990/ZOMATO,food_delivery,False
+UPI/7748383/ZOMATOE,food_delivery,False
+UPI/7811812/ZOMATOE,food_delivery,False
+UPI/7902080/ZOMATO,food_delivery,False
+UPI/7924109/ZOMATO,food_delivery,False
+UPI/8078673/ZOMATO,food_delivery,False
+UPI/8258893/ZOMATO,food_delivery,False
+UPI/8689294/ZOMATO,food_delivery,False
+UPI/8811614/ZOMATOE,food_delivery,False
+UPI/8987741/ZOMATOE,food_delivery,False
+UPI/9462102/ZOMATO,food_delivery,False
+UPI/9570420/ZOMATO,food_delivery,False
+UPI/9624806/ZOMATO,food_delivery,False
+UPI/9674402/ZOMATO,food_delivery,False
+upi/zomato/1192619,food_delivery,False
+upi/zomato/1728977,food_delivery,False
+upi/zomato/1834863,food_delivery,False
+upi/zomato/1913658,food_delivery,False
+upi/zomato/1951485,food_delivery,False
+upi/zomato/2057974,food_delivery,False
+upi/zomato/2373707,food_delivery,False
+upi/zomato/2439352,food_delivery,False
+upi/zomato/2558963,food_delivery,False
+upi/zomato/2827722,food_delivery,False
+upi/zomato/2988790,food_delivery,False
+upi/zomato/3133335,food_delivery,False
+upi/zomato/3572257,food_delivery,False
+upi/zomato/4150502,food_delivery,False
+upi/zomato/4514944,food_delivery,False
+upi/zomato/4684531,food_delivery,False
+upi/zomato/4684602,food_delivery,False
+upi/zomato/5079082,food_delivery,False
+upi/zomato/6339262,food_delivery,False
+upi/zomato/6459821,food_delivery,False
+upi/zomato/6706442,food_delivery,False
+upi/zomato/6707197,food_delivery,False
+upi/zomato/6984063,food_delivery,False
+upi/zomato/7067228,food_delivery,False
+upi/zomato/7199417,food_delivery,False
+upi/zomato/7469209,food_delivery,False
+upi/zomato/7489032,food_delivery,False
+upi/zomato/7675845,food_delivery,False
+upi/zomato/7730428,food_delivery,False
+upi/zomato/8328107,food_delivery,False
+upi/zomato/8346872,food_delivery,False
+upi/zomato/8546116,food_delivery,False
+upi/zomato/8632399,food_delivery,False
+upi/zomato/9517169,food_delivery,False
+upi/zomato/9873325,food_delivery,False
+upi/zomato/9888619,food_delivery,False

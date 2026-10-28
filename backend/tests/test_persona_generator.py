@@ -18,7 +18,7 @@ def test_rahul_generation_is_deterministic_and_has_expected_shape(tmp_path):
     assert (first / "transactions.csv").read_bytes() == (second / "transactions.csv").read_bytes()
     with (first / "transactions.csv").open(newline="", encoding="utf-8") as handle:
         rows = list(csv.DictReader(handle))
-    assert len(rows) == 170
+    assert len(rows) == 182
     assert {"transactions.csv", "loans.csv", "cards.csv"} == {
         path.name for path in first.iterdir()
     }
@@ -73,3 +73,29 @@ def test_all_personas_have_three_csv_files_and_planted_anomalies(tmp_path):
     assert "EMERGENCY LAPTOP PURCHASE" in descriptions_by_persona["arjun"]
     assert descriptions_by_persona["meera"].count("DUPLICATE GROCERY CHARGE") == 2
     assert "EMERGENCY LAPTOP PURCHASE" in descriptions_by_persona["sam"]
+
+
+def test_synthetic_labels_have_required_columns_and_no_duplicate_rows(tmp_path):
+    write_all_personas(tmp_path / "synthetic")
+    labels = tmp_path / "labeled" / "labeled_synthetic.csv"
+    assert labels.exists()
+    with labels.open(newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        rows = list(reader)
+    assert reader.fieldnames == ["raw_description", "true_category", "is_recurring"]
+    assert len(rows) >= 200
+    assert len(rows) == len(
+        {
+            (
+                row["raw_description"],
+                row["true_category"],
+                row["is_recurring"],
+            )
+            for row in rows
+        }
+    )
+    assert len(
+        {row["raw_description"] for row in rows if "SWIGGY" in row["raw_description"]}
+    ) >= 2
+    assert any("UPI" in row["raw_description"] for row in rows)
+    assert any("ORDR" in row["raw_description"] or "ZOMATOE" in row["raw_description"] for row in rows)

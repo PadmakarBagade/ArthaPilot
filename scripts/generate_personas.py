@@ -102,14 +102,22 @@ def generate_persona(
 ) -> list[dict[str, int | str]]:
     profile = PROFILES[persona_id]
     rng = random.Random(seed + list(PROFILES).index(persona_id))
-    transactions: list[dict[str, int | str]] = []
+    transactions: list[dict[str, int | str | bool]] = []
 
-    def add(transaction_date: date, amount_paise: int, description: str) -> None:
+    def add(
+        transaction_date: date,
+        amount_paise: int,
+        description: str,
+        category: str,
+        recurring: bool = False,
+    ) -> None:
         transactions.append(
             {
                 "date": transaction_date.isoformat(),
                 "amount_paise": amount_paise,
                 "description": description,
+                "true_category": category,
+                "is_recurring": recurring,
             }
         )
 
@@ -120,42 +128,55 @@ def generate_persona(
         income = int(profile["salary_paise"])
         if persona_id == "arjun":
             income = rng.randint(4_000_000, 10_000_000)
-        add(date(year, month, 1), income, str(profile["income_description"]))
+        add(date(year, month, 1), income, str(profile["income_description"]), "income", True)
 
         rent = int(profile["rent_paise"])
         if rent:
-            add(date(year, month, 2), -rent, "RENT PAYMENT")
+            add(date(year, month, 2), -rent, "RENT PAYMENT", "housing", True)
         if int(profile["loan_count"]):
-            add(date(year, month, 5), -int(profile["loan_emi_paise"]), "HOME LOAN EMI" if persona_id == "priya" else "CAR EMI")
+            add(date(year, month, 5), -int(profile["loan_emi_paise"]), "HOME LOAN EMI" if persona_id == "priya" else "CAR EMI", "debt", True)
         if int(profile["loan_count"]) > 1:
-            add(date(year, month, 7), -int(profile["second_loan_emi_paise"]), "PERSONAL LOAN EMI")
-        add(date(year, month, 6), -350_000, "ELECTRICITY BILL")
-        add(date(year, month, 8), -49_900, "AIRTEL MOBILE BILL")
-        add(date(year, month, 10), -79_900, "ACT FIBERNET INTERNET")
+            add(date(year, month, 7), -int(profile["second_loan_emi_paise"]), "PERSONAL LOAN EMI", "debt", True)
+        add(date(year, month, 6), -350_000, "ELECTRICITY BILL", "utilities", True)
+        add(date(year, month, 8), -49_900, "AIRTEL MOBILE BILL", "utilities", True)
+        add(date(year, month, 10), -79_900, "ACT FIBERNET INTERNET", "utilities", True)
         netflix = -99_900
         if profile["anomaly"] == "subscription_hike" and month >= 7:
             netflix = -149_900
-        add(date(year, month, 12), netflix, "NETFLIX.COM")
-        add(date(year, month, 14), -11_900, "SPOTIFY")
+        add(date(year, month, 12), netflix, "NETFLIX.COM", "subscriptions", True)
+        add(date(year, month, 14), -11_900, "SPOTIFY", "subscriptions", True)
         if persona_id in {"rahul", "arjun"}:
-            add(date(year, month, 16), -120_000, "FITNESS FIRST GYM MEMBERSHIP")
+            add(date(year, month, 16), -120_000, "FITNESS FIRST GYM MEMBERSHIP", "subscriptions", True)
         if int(profile["sip_paise"]):
-            add(date(year, month, 18), -int(profile["sip_paise"]), "MUTUAL FUND SIP")
+            add(date(year, month, 18), -int(profile["sip_paise"]), "MUTUAL FUND SIP", "investments", True)
         if int(profile["card_balance_paise"]):
-            add(date(year, month, 20), -max(50_000, int(profile["card_balance_paise"]) // 50), "CREDIT CARD PAYMENT")
+            add(date(year, month, 20), -max(50_000, int(profile["card_balance_paise"]) // 50), "CREDIT CARD PAYMENT", "debt", True)
+        add(date(year, month, 22), -250_000, "AMZN PAY IN", "shopping")
 
         for weekend_date in (
             _next_weekend(year, month, 3),
             _next_weekend(year, month, min(17, last_day)),
         ):
-            add(weekend_date, -rng.randint(1_200, 2_800) * 100, f"SWIGGY*ORDER {rng.randint(1000, 9999)}")
-            add(weekend_date + timedelta(days=1), -rng.randint(800, 2_200) * 100, "UPI/4458221/ZOMATO")
+            swiggy_format = rng.choice(
+                ("SWIGGY*ORDER", "SWIGGY ORDER", "SWIGGY/ORDER", "SWIGGY*ORDR")
+            )
+            add(weekend_date, -rng.randint(1_200, 2_800) * 100, f"{swiggy_format} {rng.randint(1000, 9999)}", "food_delivery")
+            upi_format = rng.choice(
+                (
+                    "UPI/{reference}/ZOMATO",
+                    "UPI-ZOMATO-{reference}",
+                    "upi/zomato/{reference}",
+                    "UPI/{reference}/ZOMATOE",
+                )
+            )
+            upi_format = upi_format.format(reference=rng.randint(1_000_000, 9_999_999))
+            add(weekend_date + timedelta(days=1), -rng.randint(800, 2_200) * 100, upi_format, "food_delivery")
 
         if month == 6 and profile["anomaly"] == "duplicate":
-            add(date(year, month, 25), -250_000, "DUPLICATE GROCERY CHARGE")
-            add(date(year, month, 25), -250_000, "DUPLICATE GROCERY CHARGE")
+            add(date(year, month, 25), -250_000, "DUPLICATE GROCERY CHARGE", "groceries")
+            add(date(year, month, 25), -250_000, "DUPLICATE GROCERY CHARGE", "groceries")
         if month == 9 and profile["anomaly"] == "large_spend":
-            add(date(year, month, 23), -1_500_000, "EMERGENCY LAPTOP PURCHASE")
+            add(date(year, month, 23), -1_500_000, "EMERGENCY LAPTOP PURCHASE", "shopping")
 
     return transactions
 
@@ -217,7 +238,14 @@ def write_persona(
     with (output_dir / "transactions.csv").open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=["date", "amount_paise", "description"])
         writer.writeheader()
-        writer.writerows(generate_persona(persona_id, seed))
+        writer.writerows(
+            {
+                "date": row["date"],
+                "amount_paise": row["amount_paise"],
+                "description": row["description"],
+            }
+            for row in generate_persona(persona_id, seed)
+        )
     _write_loan_rows(persona_id, output_dir)
     _write_card_row(persona_id, output_dir)
 
@@ -229,6 +257,39 @@ def write_rahul(output_dir: Path = Path("data/synthetic/rahul"), seed: int = DEF
 def write_all_personas(output_root: Path = Path("data/synthetic"), seed: int = DEFAULT_SEED) -> None:
     for persona_id in PROFILES:
         write_persona(persona_id, output_root / persona_id, seed)
+    write_synthetic_labels(output_root.parent / "labeled", seed)
+
+
+def write_synthetic_labels(
+    output_dir: Path = Path("data/labeled"), seed: int = DEFAULT_SEED
+) -> None:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    labels: set[tuple[str, str, bool]] = set()
+    for persona_id in PROFILES:
+        for row in generate_persona(persona_id, seed):
+            labels.add(
+                (
+                    str(row["description"]),
+                    str(row["true_category"]),
+                    bool(row["is_recurring"]),
+                )
+            )
+    with (output_dir / "labeled_synthetic.csv").open(
+        "w", newline="", encoding="utf-8"
+    ) as handle:
+        writer = csv.DictWriter(
+            handle,
+            fieldnames=["raw_description", "true_category", "is_recurring"],
+        )
+        writer.writeheader()
+        writer.writerows(
+            {
+                "raw_description": description,
+                "true_category": category,
+                "is_recurring": recurring,
+            }
+            for description, category, recurring in sorted(labels)
+        )
 
 
 if __name__ == "__main__":
