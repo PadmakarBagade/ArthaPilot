@@ -22,7 +22,7 @@ def parse_file(file: IO[bytes] | IO[str], filename: str) -> list[dict[str, str]]
     suffix = Path(filename).suffix.lower()
     if suffix == ".csv":
         return parse_csv(file)
-    if suffix in {".xlsx", ".xls"}:
+    if suffix == ".xlsx":
         try:
             import pandas as pd
         except ImportError as exc:
@@ -43,4 +43,4 @@ def parse_file(file: IO[bytes] | IO[str], filename: str) -> list[dict[str, str]]
         if not rows:
             raise ValueError("No table found in PDF upload")
         return rows
-    raise ValueError("Only CSV, Excel, and PDF uploads are supported")
+    raise ValueError("Only CSV, XLSX, and PDF uploads are supported")
