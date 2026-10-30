@@ -90,6 +90,36 @@ class ProcessResponse(BaseModel):
     income: dict[str, Any]
 
 
+class MetricResultRead(BaseModel):
+    key: str
+    plain_label: str
+    raw_value: float | None
+    unit: str
+    status: str
+    reason: str
+    evidence: dict[str, Any]
+    sub_score: float | None
+    effective_weight: float
+    points_earned: float
+    points_lost: float
+
+
+class HealthResponse(BaseModel):
+    total_score: float | None
+    indicative_score: float | None
+    band: str
+    score_coverage: float
+    months_used: int
+    partial_months: list[str]
+    window_start: date | None
+    window_end: date | None
+    metrics: dict[str, MetricResultRead]
+    top_issues: list[str]
+    summary: str
+    uncategorised_share: float
+    p2p_outflow_share: float
+
+
 class GoalRead(SchemaBase):
     id: str
     user_id: str

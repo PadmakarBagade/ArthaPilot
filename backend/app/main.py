@@ -1,8 +1,9 @@
 import csv
+from datetime import date
 from io import BytesIO
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from collections import Counter
 from sqlalchemy import select
@@ -12,11 +13,12 @@ from .db import create_tables, get_db
 from .config import settings
 from .ingestion.cleaning import clean_transactions
 from .ingestion.parser import parse_file
-from .models import Account, RecurringItem, Transaction, User
-from .schemas import ProcessResponse, RecurringItemRead, UserRead
+from .models import Account, Card, Loan, RecurringItem, Transaction, User
+from .schemas import HealthResponse, ProcessResponse, RecurringItemRead, UserRead
 from .categorise.cascade import categorise
 from .categorise.rules import UNCATEGORISED
 from .recurring import detect_income, detect_recurring
+from .metrics import compute_health_score
 
 app = FastAPI(title="ArthaPilot")
 create_tables()
@@ -126,6 +128,7 @@ def load_persona(user_id: str, db: Session = Depends(get_db)) -> dict[str, int |
     )
     if not persona_file.exists():
         raise HTTPException(status_code=404, detail="Persona not found")
+    persona_dir = persona_file.parent
 
     with persona_file.open(encoding="utf-8", newline="") as handle:
         rows = list(csv.DictReader(handle))
@@ -133,15 +136,48 @@ def load_persona(user_id: str, db: Session = Depends(get_db)) -> dict[str, int |
     db.add(user)
     transactions = clean_transactions(rows, user_id=user_id, source="synthetic")
     account_id = f"{user_id}-primary"
-    if db.get(Account, account_id) is None:
-        db.add(
-            Account(
-                id=account_id,
-                user_id=user_id,
-                type="savings",
-                institution="Synthetic bank",
-            )
-        )
+    accounts_file = persona_dir / "accounts.csv"
+    if accounts_file.exists():
+        with accounts_file.open(encoding="utf-8", newline="") as handle:
+            for row in csv.DictReader(handle):
+                account = db.get(Account, row["id"])
+                if account is None:
+                    db.add(
+                        Account(
+                            id=row["id"],
+                            user_id=user_id,
+                            type=row["type"],
+                            institution=row["institution"],
+                            balance_paise=int(row["balance_paise"]),
+                            credit_limit_paise=(
+                                int(row["credit_limit_paise"])
+                                if row.get("credit_limit_paise")
+                                else None
+                            ),
+                        )
+                    )
+                if row["type"] in {"savings", "current"}:
+                    account_id = row["id"]
+    elif db.get(Account, account_id) is None:
+        db.add(Account(id=account_id, user_id=user_id, type="savings", institution="Synthetic bank"))
+    for model, filename in ((Loan, "loans.csv"), (Card, "cards.csv")):
+        sidecar = persona_dir / filename
+        if sidecar.exists():
+            with sidecar.open(encoding="utf-8", newline="") as handle:
+                for row in csv.DictReader(handle):
+                    if db.get(model, row["id"]) is None:
+                        values = dict(row)
+                        for field in ("principal_paise", "outstanding_paise", "emi_paise", "limit_paise", "balance_paise", "min_due_paise"):
+                            if field in values and values[field] != "":
+                                values[field] = int(values[field])
+                        for field in ("rate_apr", "apr"):
+                            if field in values and values[field] != "":
+                                values[field] = float(values[field])
+                        for field in ("next_due_date", "due_date"):
+                            if field in values and values[field]:
+                                values[field] = date.fromisoformat(values[field])
+                        values["user_id"] = user_id
+                        db.add(model(**values))
     for transaction in transactions:
         transaction["account_id"] = account_id
     for transaction in transactions:
@@ -217,3 +253,26 @@ def recurring_for_user(user_id: str, db: Session = Depends(get_db)) -> list[Recu
             .order_by(RecurringItem.next_due_date)
         )
     )
+
+
+@app.get("/users/{user_id}/health", response_model=HealthResponse)
+def health_for_user(
+    user_id: str,
+    months: int = Query(6, ge=3, le=12),
+    db: Session = Depends(get_db),
+) -> dict:
+    user = db.get(User, user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    transactions = list(
+        db.scalars(select(Transaction).where(Transaction.user_id == user_id).order_by(Transaction.date))
+    )
+    loans = list(db.scalars(select(Loan).where(Loan.user_id == user_id)))
+    cards = list(db.scalars(select(Card).where(Card.user_id == user_id)))
+    accounts = list(db.scalars(select(Account).where(Account.user_id == user_id)))
+    report = compute_health_score(transactions, loans, cards, accounts, requested_months=months)
+    uncategorised = sum(
+        1 for transaction in transactions if not transaction.category or transaction.category == UNCATEGORISED
+    )
+    report["uncategorised_share"] = uncategorised / len(transactions) if transactions else 0.0
+    return report

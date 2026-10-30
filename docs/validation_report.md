@@ -100,3 +100,16 @@ Confusion matrix (rows = actual, columns = predicted):
 - Expected items: 40
 
 Income detection is validated by the backend unit tests.
+
+## Phase 3 health score validation
+
+The five synthetic personas were scored with the pure metrics functions.
+Ordering checks passed: Priya scored above Rahul; Meera had the lowest credit
+utilisation or debt sub-score; Arjun had the lowest income-stability sub-score;
+and Sam had the lowest emergency-runway sub-score.
+
+Berka distribution counts (20 selected public accounts): minimum score 30.05,
+median score 60.15, maximum score 92.94, coverage below 0.5 for 0 accounts,
+zero-income accounts for 0 accounts, and runway available for 20 accounts.
+These values come from the local score validation command and contain no
+personal-user data.

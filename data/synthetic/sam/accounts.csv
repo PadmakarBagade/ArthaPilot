@@ -1,0 +1,3 @@
+id,user_id,type,institution,balance_paise,credit_limit_paise
+sam-primary,sam,savings,Synthetic bank,500000,
+sam-credit-card-account,sam,credit_card,Synthetic bank,700000,3000000

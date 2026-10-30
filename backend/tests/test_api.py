@@ -70,3 +70,15 @@ def test_load_rahul_persona():
     users = TestClient(app).get("/users")
     assert users.status_code == 200
     assert any(user["id"] == "rahul" for user in users.json())
+
+
+def test_load_persona_imports_story_accounts_cards_and_loans():
+    response = TestClient(app).post("/users/priya/load-persona")
+    assert response.status_code == 200
+    from app.db import SessionLocal
+    from app.models import Account, Card, Loan
+
+    with SessionLocal() as session:
+        assert session.query(Account).filter_by(user_id="priya").count() == 2
+        assert session.query(Card).filter_by(user_id="priya").count() == 1
+        assert session.query(Loan).filter_by(user_id="priya").count() == 1

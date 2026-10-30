@@ -6,7 +6,7 @@
 ![Phase](https://img.shields.io/badge/phase-2%20complete-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-> **Project status:** Phase 2 (categorisation, recurring and income detection) is complete. Features below marked "Planned" are not built yet. See the [Roadmap](#roadmap) for exact progress. This README is updated at the end of every phase.
+> **Project status:** Phase 3 (categorisation, recurring and financial health scoring) is complete. Features below marked "Planned" are not built yet. See the [Roadmap](#roadmap) for exact progress. This README is updated at the end of every phase.
 
 ---
 
@@ -54,7 +54,7 @@ Status key: Done, In progress, Planned.
 | Transaction categorisation | Done |
 | Recurring-bill detection with evidence and next due dates | Done |
 | Income and salary detection | Done |
-| Financial Health Score (0 to 100) with reasons | Planned |
+| Financial Health Score (0 to 100) with reasons | Done (shown only with enough data) |
 | Confidence meter with reasons and "how to improve" | Planned |
 | 90-day cash-flow forecast with best, likely and worst bands | Planned |
 | Danger Calendar (risky days highlighted) | Planned |
@@ -205,7 +205,7 @@ arthapilot/
 | 0 | Project skeleton: backend, frontend, Docker, CI | Done |
 | 1 | Data layer: personas, Berka loader, upload and cleaning | Done |
 | 2 | Categorisation and recurring/income detection | Done |
-| 3 | Health metrics and 0 to 100 score | Planned |
+| 3 | Health metrics and 0 to 100 score | Done |
 | 4 | Data-quality and confidence engine | Planned |
 | 5 | Cash-flow forecast, gap detection, stress tests, backtests | Planned |
 | 6 | Action simulator, Best Next Move, affordability, goals | Planned |

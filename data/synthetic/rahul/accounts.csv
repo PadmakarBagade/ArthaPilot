@@ -1,0 +1,3 @@
+id,user_id,type,institution,balance_paise,credit_limit_paise
+rahul-primary,rahul,savings,Synthetic bank,2500000,
+rahul-credit-card-account,rahul,credit_card,Synthetic bank,12500000,15000000
