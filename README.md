@@ -106,7 +106,6 @@ ArthaPilot uses three data layers that all feed one common transaction format, s
 Honest notes: the Berka dataset is from a Czech bank and is not in rupees, so it tests cash-flow logic rather than merchant-name categorisation. Synthetic data is used only for scenario testing, never as proof of accuracy. Real-statement validation was performed locally on a private UPI statement; only aggregate results are published in [the validation report](docs/validation_report.md).
 
 No real user data is ever committed to this repository.
-Real-statement validation is planned for later.
 
 ## Tech Stack
 
