@@ -19,25 +19,37 @@ DEFAULT_ACCOUNT_LIMIT = 20
 MIN_MONTHS = 12
 
 CATEGORY_BY_CODE = {
-    "SIPO": "household",
-    "POJISTNE": "insurance",
-    "SANKCE": "fees",
-    "UVER": "loan_payment",
-    "DUCHOD": "income",
-    "懒": "other",
+    "SIPO": "Utilities",
+    "POJISTNE": "Insurance",
+    "SANKCE": "Fees and Charges",
+    "UVER": "EMI/Loan",
+    "LEASING": "EMI/Loan",
 }
 
 OPERATION_CATEGORY = {
-    "VYBER": "cash_withdrawal",
-    "VKLAD": "deposit",
-    "PREVOD Z UCTU": "transfer",
-    "PREVOD NA UCET": "transfer",
-    "VYBER KARTOU": "card_payment",
+    "VYBER": "Cash Withdrawal",
+    "PREVOD Z UCTU": "Transfers",
+    "PREVOD NA UCET": "Transfers",
+    "VYBER KARTOU": "Credit Card Payment",
 }
 
 
-def category_for(operation: str, k_symbol: str) -> str:
-    return CATEGORY_BY_CODE.get(k_symbol, OPERATION_CATEGORY.get(operation, "other"))
+def category_for(operation: str, k_symbol: str, amount: str | float | None = None) -> str:
+    """Map Berka codes to canonical categories; credits are always Other Income."""
+    if amount is not None and float(amount) > 0:
+        return "Other Income"
+    if k_symbol in CATEGORY_BY_CODE:
+        return CATEGORY_BY_CODE[k_symbol]
+    if operation in OPERATION_CATEGORY:
+        return OPERATION_CATEGORY[operation]
+    return "Uncategorised"
+
+
+def signed_amount(row: dict[str, str]) -> str:
+    amount = abs(float(row["amount"]))
+    if row.get("type", "").upper() in {"VYDAJ", "VYBER"}:
+        return str(-amount)
+    return str(amount)
 
 
 def _read_transactions(path: Path) -> Iterable[dict[str, str]]:
@@ -63,6 +75,14 @@ def select_account_ids(
     return eligible[:limit]
 
 
+def last_balances(path: Path, account_ids: set[str]) -> dict[str, int]:
+    balances: dict[str, int] = {}
+    for row in _read_transactions(path):
+        if row["account_id"] in account_ids:
+            balances[row["account_id"]] = round(float(row["balance"]) * 100)
+    return balances
+
+
 def load_berka_rows(
     path: Path,
     user_id: str = "berka",
@@ -78,7 +98,7 @@ def load_berka_rows(
                 "trans_id": f"berka-{row['trans_id']}",
                 "account_id": f"berka-{row['account_id']}",
                 "date": row["date"],
-                "amount": row["amount"],
+                "amount": signed_amount(row),
                 "description": " ".join(
                     value
                     for value in (row.get("operation", ""), row.get("k_symbol", ""))
@@ -86,7 +106,7 @@ def load_berka_rows(
                 )
                 or row.get("type", "Berka transaction"),
                 "category": category_for(
-                    row.get("operation", ""), row.get("k_symbol", "")
+                    row.get("operation", ""), row.get("k_symbol", ""), signed_amount(row)
                 ),
             }
         )
@@ -107,6 +127,7 @@ def load_berka_database(
         for row in _read_transactions(trans_path)
         if row["account_id"] in selected
     }
+    balances = last_balances(trans_path, selected)
     users = {
         f"berka-{account_id}": User(
             id=f"berka-{account_id}",
@@ -122,7 +143,7 @@ def load_berka_database(
             user_id=f"berka-{account_id}",
             type="savings",
             institution="Berka (Czech koruna source data)",
-            balance_paise=round(float(row["balance"]) * 100),
+            balance_paise=balances[account_id],
         )
         for account_id, row in account_rows.items()
     )
@@ -136,7 +157,7 @@ def load_berka_database(
                 "trans_id": f"berka-{row['trans_id']}",
                 "account_id": f"berka-{row['account_id']}",
                 "date": row["date"],
-                "amount": row["amount"],
+                "amount": signed_amount(row),
                 "description": " ".join(
                     value
                     for value in (row.get("operation", ""), row.get("k_symbol", ""))
@@ -144,7 +165,7 @@ def load_berka_database(
                 )
                 or row.get("type", "Berka transaction"),
                 "category": category_for(
-                    row.get("operation", ""), row.get("k_symbol", "")
+                    row.get("operation", ""), row.get("k_symbol", ""), signed_amount(row)
                 ),
             }
             for row in rows

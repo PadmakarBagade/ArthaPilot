@@ -19,7 +19,7 @@ def test_rahul_generation_is_deterministic_and_has_expected_shape(tmp_path):
     with (first / "transactions.csv").open(newline="", encoding="utf-8") as handle:
         rows = list(csv.DictReader(handle))
     assert len(rows) == 182
-    assert {"transactions.csv", "loans.csv", "cards.csv"} == {
+    assert {"transactions.csv", "loans.csv", "cards.csv", "accounts.csv"} == {
         path.name for path in first.iterdir()
     }
 
@@ -45,12 +45,17 @@ def test_all_personas_have_three_csv_files_and_planted_anomalies(tmp_path):
     }
     for persona_dir in tmp_path.iterdir():
         assert {path.name for path in persona_dir.iterdir()} == {
-            "transactions.csv", "loans.csv", "cards.csv"
+            "transactions.csv", "loans.csv", "cards.csv", "accounts.csv"
         }
         with (persona_dir / "transactions.csv").open(newline="", encoding="utf-8") as handle:
             rows = list(csv.DictReader(handle))
         assert len(rows) >= 144
         assert all(int(row["amount_paise"]) == int(row["amount_paise"]) for row in rows)
+        with (persona_dir / "accounts.csv").open(newline="", encoding="utf-8") as handle:
+            accounts = list(csv.DictReader(handle))
+        assert len(accounts) == 2
+        assert any(row["type"] in {"savings", "current"} for row in accounts)
+        assert all(int(row["balance_paise"]) >= 0 for row in accounts)
 
     descriptions_by_persona = {}
     rows_by_persona = {}

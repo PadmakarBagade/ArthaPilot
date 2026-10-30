@@ -1,0 +1,3 @@
+id,user_id,type,institution,balance_paise,credit_limit_paise
+meera-primary,meera,savings,Synthetic bank,3000000,
+meera-credit-card-account,meera,credit_card,Synthetic bank,18500000,20000000

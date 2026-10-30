@@ -28,6 +28,8 @@ PROFILES: dict[str, Profile] = {
         "card_apr": 36.0,
         "sip_paise": 0,
         "anomaly": "duplicate",
+        # Story-defined before metrics: under one month of Rahul's expenses.
+        "liquid_balance_paise": 2_500_000,
     },
     "priya": {
         "name": "Priya",
@@ -43,6 +45,8 @@ PROFILES: dict[str, Profile] = {
         "card_apr": 24.0,
         "sip_paise": 2_000_000,
         "anomaly": "subscription_hike",
+        # Story-defined before metrics: comfortably over six months of expenses.
+        "liquid_balance_paise": 50_000_000,
     },
     "arjun": {
         "name": "Arjun",
@@ -58,6 +62,8 @@ PROFILES: dict[str, Profile] = {
         "card_apr": 30.0,
         "sip_paise": 0,
         "anomaly": "large_spend",
+        # Story-defined before metrics: moderate buffer with uneven income.
+        "liquid_balance_paise": 15_000_000,
     },
     "meera": {
         "name": "Meera",
@@ -74,6 +80,8 @@ PROFILES: dict[str, Profile] = {
         "card_apr": 42.0,
         "sip_paise": 0,
         "anomaly": "duplicate",
+        # Story-defined before metrics: low buffer despite substantial obligations.
+        "liquid_balance_paise": 3_000_000,
     },
     "sam": {
         "name": "Sam",
@@ -89,6 +97,8 @@ PROFILES: dict[str, Profile] = {
         "card_apr": 30.0,
         "sip_paise": 0,
         "anomaly": "large_spend",
+        # Story-defined before metrics: almost no savings.
+        "liquid_balance_paise": 500_000,
     },
 }
 
@@ -249,6 +259,35 @@ def _write_card_row(persona_id: str, output_dir: Path) -> None:
         )
 
 
+def _write_account_rows(persona_id: str, output_dir: Path) -> None:
+    profile = PROFILES[persona_id]
+    fields = ["id", "user_id", "type", "institution", "balance_paise", "credit_limit_paise"]
+    with (output_dir / "accounts.csv").open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer.writeheader()
+        writer.writerow(
+            {
+                "id": f"{persona_id}-primary",
+                "user_id": persona_id,
+                "type": "savings" if persona_id != "arjun" else "current",
+                "institution": "Synthetic bank",
+                "balance_paise": int(profile["liquid_balance_paise"]),
+                "credit_limit_paise": "",
+            }
+        )
+        if int(profile["card_limit_paise"]):
+            writer.writerow(
+                {
+                    "id": f"{persona_id}-credit-card-account",
+                    "user_id": persona_id,
+                    "type": "credit_card",
+                    "institution": "Synthetic bank",
+                    "balance_paise": int(profile["card_balance_paise"]),
+                    "credit_limit_paise": int(profile["card_limit_paise"]),
+                }
+            )
+
+
 def write_persona(
     persona_id: str, output_dir: Path | None = None, seed: int = DEFAULT_SEED
 ) -> None:
@@ -272,6 +311,7 @@ def write_persona(
         )
     _write_loan_rows(persona_id, output_dir)
     _write_card_row(persona_id, output_dir)
+    _write_account_rows(persona_id, output_dir)
 
 
 def write_rahul(output_dir: Path = Path("data/synthetic/rahul"), seed: int = DEFAULT_SEED) -> None:

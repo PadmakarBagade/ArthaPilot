@@ -1,0 +1,3 @@
+id,user_id,type,institution,balance_paise,credit_limit_paise
+priya-primary,priya,savings,Synthetic bank,50000000,
+priya-credit-card-account,priya,credit_card,Synthetic bank,2000000,30000000
