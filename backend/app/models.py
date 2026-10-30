@@ -74,6 +74,7 @@ class Transaction(Base):
     category: Mapped[str] = mapped_column(String(80), default="")
     category_confidence: Mapped[float] = mapped_column(Float, default=0.0)
     is_recurring: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_self_transfer: Mapped[bool] = mapped_column(Boolean, default=False)
     source: Mapped[str] = mapped_column(String(20))
     user: Mapped[User] = relationship(back_populates="transactions")
 

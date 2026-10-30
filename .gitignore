@@ -1,5 +1,7 @@
 .env
 data/private/
+data/private/*real*.joblib
+data/private/*real*.pkl
 data/berka/
 node_modules/
 __pycache__/

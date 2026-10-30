@@ -15,6 +15,13 @@ class Base(DeclarativeBase):
 
 def create_tables(target_engine=engine) -> None:
     Base.metadata.create_all(bind=target_engine)
+    if target_engine.dialect.name == "sqlite":
+        with target_engine.begin() as connection:
+            columns = {row[1] for row in connection.exec_driver_sql("PRAGMA table_info(transactions)")}
+            if "is_self_transfer" not in columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE transactions ADD COLUMN is_self_transfer BOOLEAN NOT NULL DEFAULT 0"
+                )
 
 
 def get_db():
