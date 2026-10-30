@@ -1,4 +1,444 @@
 raw_description,true_category,is_recurring
+01 C@SHWITHDRAWAL,Cash Withdrawal,False
+01 CREDITC@RDPAYMENT,Credit Card Payment,False
+01 DINING,Dining,False
+01 EDUC@TION,Education,False
+01 EMILO@N,EMI/Loan,False
+01 ENTERT@INMENT,Entertainment,False
+01 FEES@NDCHARGES,Fees and Charges,False
+01 FOODDELIVERY,Food Delivery,False
+01 GROCERIES,Groceries,False
+01 HE@LTH,Health,False
+01 INSUR@NCE,Insurance,False
+01 INVESTMENTSIP,Investment/SIP,False
+01 OTHERINCOME,Other Income,False
+01 RENT,Rent,False
+01 S@LARY,Salary,False
+01 SHOPPING,Shopping,False
+01 SUBSCRIPTIONS,Subscriptions,False
+01 TR@NSFERS,Transfers,False
+01 TR@NSPORT,Transport,False
+01 TR@VEL,Travel,False
+01 UNC@TEGORISED,Uncategorised,False
+01 UTILITIES,Utilities,False
+02 CASHWITHDRAWAL UPI,Cash Withdrawal,False
+02 CREDITCARDPAYMENT UPI,Credit Card Payment,False
+02 DINING UPI,Dining,False
+02 EDUCATION UPI,Education,False
+02 EMILOAN UPI,EMI/Loan,False
+02 ENTERTAINMENT UPI,Entertainment,False
+02 FEESANDCHARGES UPI,Fees and Charges,False
+02 FOODDELIVERY UPI,Food Delivery,False
+02 GROCERIES UPI,Groceries,False
+02 HEALTH UPI,Health,False
+02 INSURANCE UPI,Insurance,False
+02 INVESTMENTSIP UPI,Investment/SIP,False
+02 OTHERINCOME UPI,Other Income,False
+02 RENT UPI,Rent,False
+02 SALARY UPI,Salary,False
+02 SHOPPING UPI,Shopping,False
+02 SUBSCRIPTIONS UPI,Subscriptions,False
+02 TRANSFERS UPI,Transfers,False
+02 TRANSPORT UPI,Transport,False
+02 TRAVEL UPI,Travel,False
+02 UNCATEGORISED UPI,Uncategorised,False
+02 UTILITIES UPI,Utilities,False
+03 CASHWITHDRAWAL STORE,Cash Withdrawal,False
+03 CREDITCARDPAYMENT STORE,Credit Card Payment,False
+03 DINING STORE,Dining,False
+03 EDUCATION STORE,Education,False
+03 EMILOAN STORE,EMI/Loan,False
+03 ENTERTAINMENT STORE,Entertainment,False
+03 FEESANDCHARGES STORE,Fees and Charges,False
+03 FOODDELIVERY STORE,Food Delivery,False
+03 GROCERIES STORE,Groceries,False
+03 HEALTH STORE,Health,False
+03 INSURANCE STORE,Insurance,False
+03 INVESTMENTSIP STORE,Investment/SIP,False
+03 OTHERINCOME STORE,Other Income,False
+03 RENT STORE,Rent,False
+03 SALARY STORE,Salary,False
+03 SHOPPING STORE,Shopping,False
+03 SUBSCRIPTIONS STORE,Subscriptions,False
+03 TRANSFERS STORE,Transfers,False
+03 TRANSPORT STORE,Transport,False
+03 TRAVEL STORE,Travel,False
+03 UNCATEGORISED STORE,Uncategorised,False
+03 UTILITIES STORE,Utilities,False
+04 CASHWITHDRAWAL ONLINE,Cash Withdrawal,False
+04 CREDITCARDPAYMENT ONLINE,Credit Card Payment,False
+04 DINING ONLINE,Dining,False
+04 EDUCATION ONLINE,Education,False
+04 EMILOAN ONLINE,EMI/Loan,False
+04 ENTERTAINMENT ONLINE,Entertainment,False
+04 FEESANDCHARGES ONLINE,Fees and Charges,False
+04 FOODDELIVERY ONLINE,Food Delivery,False
+04 GROCERIES ONLINE,Groceries,False
+04 HEALTH ONLINE,Health,False
+04 INSURANCE ONLINE,Insurance,False
+04 INVESTMENTSIP ONLINE,Investment/SIP,False
+04 OTHERINCOME ONLINE,Other Income,False
+04 RENT ONLINE,Rent,False
+04 SALARY ONLINE,Salary,False
+04 SHOPPING ONLINE,Shopping,False
+04 SUBSCRIPTIONS ONLINE,Subscriptions,False
+04 TRANSFERS ONLINE,Transfers,False
+04 TRANSPORT ONLINE,Transport,False
+04 TRAVEL ONLINE,Travel,False
+04 UNCATEGORISED ONLINE,Uncategorised,False
+04 UTILITIES ONLINE,Utilities,False
+05 C@SHWITHDRAWAL PVT LTD,Cash Withdrawal,False
+05 CREDITC@RDPAYMENT PVT LTD,Credit Card Payment,False
+05 DINING PVT LTD,Dining,False
+05 EDUC@TION PVT LTD,Education,False
+05 EMILO@N PVT LTD,EMI/Loan,False
+05 ENTERT@INMENT PVT LTD,Entertainment,False
+05 FEES@NDCHARGES PVT LTD,Fees and Charges,False
+05 FOODDELIVERY PVT LTD,Food Delivery,False
+05 GROCERIES PVT LTD,Groceries,False
+05 HE@LTH PVT LTD,Health,False
+05 INSUR@NCE PVT LTD,Insurance,False
+05 INVESTMENTSIP PVT LTD,Investment/SIP,False
+05 OTHERINCOME PVT LTD,Other Income,False
+05 RENT PVT LTD,Rent,False
+05 S@LARY PVT LTD,Salary,False
+05 SHOPPING PVT LTD,Shopping,False
+05 SUBSCRIPTIONS PVT LTD,Subscriptions,False
+05 TR@NSFERS PVT LTD,Transfers,False
+05 TR@NSPORT PVT LTD,Transport,False
+05 TR@VEL PVT LTD,Travel,False
+05 UNC@TEGORISED PVT LTD,Uncategorised,False
+05 UTILITIES PVT LTD,Utilities,False
+06 CASHWITHDRAWAL,Cash Withdrawal,False
+06 CREDITCARDPAYMENT,Credit Card Payment,False
+06 DINING,Dining,False
+06 EDUCATION,Education,False
+06 EMILOAN,EMI/Loan,False
+06 ENTERTAINMENT,Entertainment,False
+06 FEESANDCHARGES,Fees and Charges,False
+06 FOODDELIVERY,Food Delivery,False
+06 GROCERIES,Groceries,False
+06 HEALTH,Health,False
+06 INSURANCE,Insurance,False
+06 INVESTMENTSIP,Investment/SIP,False
+06 OTHERINCOME,Other Income,False
+06 RENT,Rent,False
+06 SALARY,Salary,False
+06 SHOPPING,Shopping,False
+06 SUBSCRIPTIONS,Subscriptions,False
+06 TRANSFERS,Transfers,False
+06 TRANSPORT,Transport,False
+06 TRAVEL,Travel,False
+06 UNCATEGORISED,Uncategorised,False
+06 UTILITIES,Utilities,False
+07 CASHWITHDRAWAL UPI,Cash Withdrawal,False
+07 CREDITCARDPAYMENT UPI,Credit Card Payment,False
+07 DINING UPI,Dining,False
+07 EDUCATION UPI,Education,False
+07 EMILOAN UPI,EMI/Loan,False
+07 ENTERTAINMENT UPI,Entertainment,False
+07 FEESANDCHARGES UPI,Fees and Charges,False
+07 FOODDELIVERY UPI,Food Delivery,False
+07 GROCERIES UPI,Groceries,False
+07 HEALTH UPI,Health,False
+07 INSURANCE UPI,Insurance,False
+07 INVESTMENTSIP UPI,Investment/SIP,False
+07 OTHERINCOME UPI,Other Income,False
+07 RENT UPI,Rent,False
+07 SALARY UPI,Salary,False
+07 SHOPPING UPI,Shopping,False
+07 SUBSCRIPTIONS UPI,Subscriptions,False
+07 TRANSFERS UPI,Transfers,False
+07 TRANSPORT UPI,Transport,False
+07 TRAVEL UPI,Travel,False
+07 UNCATEGORISED UPI,Uncategorised,False
+07 UTILITIES UPI,Utilities,False
+08 CASHWITHDRAWAL STORE,Cash Withdrawal,False
+08 CREDITCARDPAYMENT STORE,Credit Card Payment,False
+08 DINING STORE,Dining,False
+08 EDUCATION STORE,Education,False
+08 EMILOAN STORE,EMI/Loan,False
+08 ENTERTAINMENT STORE,Entertainment,False
+08 FEESANDCHARGES STORE,Fees and Charges,False
+08 FOODDELIVERY STORE,Food Delivery,False
+08 GROCERIES STORE,Groceries,False
+08 HEALTH STORE,Health,False
+08 INSURANCE STORE,Insurance,False
+08 INVESTMENTSIP STORE,Investment/SIP,False
+08 OTHERINCOME STORE,Other Income,False
+08 RENT STORE,Rent,False
+08 SALARY STORE,Salary,False
+08 SHOPPING STORE,Shopping,False
+08 SUBSCRIPTIONS STORE,Subscriptions,False
+08 TRANSFERS STORE,Transfers,False
+08 TRANSPORT STORE,Transport,False
+08 TRAVEL STORE,Travel,False
+08 UNCATEGORISED STORE,Uncategorised,False
+08 UTILITIES STORE,Utilities,False
+09 C@SHWITHDRAWAL ONLINE,Cash Withdrawal,False
+09 CREDITC@RDPAYMENT ONLINE,Credit Card Payment,False
+09 DINING ONLINE,Dining,False
+09 EDUC@TION ONLINE,Education,False
+09 EMILO@N ONLINE,EMI/Loan,False
+09 ENTERT@INMENT ONLINE,Entertainment,False
+09 FEES@NDCHARGES ONLINE,Fees and Charges,False
+09 FOODDELIVERY ONLINE,Food Delivery,False
+09 GROCERIES ONLINE,Groceries,False
+09 HE@LTH ONLINE,Health,False
+09 INSUR@NCE ONLINE,Insurance,False
+09 INVESTMENTSIP ONLINE,Investment/SIP,False
+09 OTHERINCOME ONLINE,Other Income,False
+09 RENT ONLINE,Rent,False
+09 S@LARY ONLINE,Salary,False
+09 SHOPPING ONLINE,Shopping,False
+09 SUBSCRIPTIONS ONLINE,Subscriptions,False
+09 TR@NSFERS ONLINE,Transfers,False
+09 TR@NSPORT ONLINE,Transport,False
+09 TR@VEL ONLINE,Travel,False
+09 UNC@TEGORISED ONLINE,Uncategorised,False
+09 UTILITIES ONLINE,Utilities,False
+10 CASHWITHDRAWAL PVT LTD,Cash Withdrawal,False
+10 CREDITCARDPAYMENT PVT LTD,Credit Card Payment,False
+10 DINING PVT LTD,Dining,False
+10 EDUCATION PVT LTD,Education,False
+10 EMILOAN PVT LTD,EMI/Loan,False
+10 ENTERTAINMENT PVT LTD,Entertainment,False
+10 FEESANDCHARGES PVT LTD,Fees and Charges,False
+10 FOODDELIVERY PVT LTD,Food Delivery,False
+10 GROCERIES PVT LTD,Groceries,False
+10 HEALTH PVT LTD,Health,False
+10 INSURANCE PVT LTD,Insurance,False
+10 INVESTMENTSIP PVT LTD,Investment/SIP,False
+10 OTHERINCOME PVT LTD,Other Income,False
+10 RENT PVT LTD,Rent,False
+10 SALARY PVT LTD,Salary,False
+10 SHOPPING PVT LTD,Shopping,False
+10 SUBSCRIPTIONS PVT LTD,Subscriptions,False
+10 TRANSFERS PVT LTD,Transfers,False
+10 TRANSPORT PVT LTD,Transport,False
+10 TRAVEL PVT LTD,Travel,False
+10 UNCATEGORISED PVT LTD,Uncategorised,False
+10 UTILITIES PVT LTD,Utilities,False
+11 CASHWITHDRAWAL,Cash Withdrawal,False
+11 CREDITCARDPAYMENT,Credit Card Payment,False
+11 DINING,Dining,False
+11 EDUCATION,Education,False
+11 EMILOAN,EMI/Loan,False
+11 ENTERTAINMENT,Entertainment,False
+11 FEESANDCHARGES,Fees and Charges,False
+11 FOODDELIVERY,Food Delivery,False
+11 GROCERIES,Groceries,False
+11 HEALTH,Health,False
+11 INSURANCE,Insurance,False
+11 INVESTMENTSIP,Investment/SIP,False
+11 OTHERINCOME,Other Income,False
+11 RENT,Rent,False
+11 SALARY,Salary,False
+11 SHOPPING,Shopping,False
+11 SUBSCRIPTIONS,Subscriptions,False
+11 TRANSFERS,Transfers,False
+11 TRANSPORT,Transport,False
+11 TRAVEL,Travel,False
+11 UNCATEGORISED,Uncategorised,False
+11 UTILITIES,Utilities,False
+12 CASHWITHDRAWAL UPI,Cash Withdrawal,False
+12 CREDITCARDPAYMENT UPI,Credit Card Payment,False
+12 DINING UPI,Dining,False
+12 EDUCATION UPI,Education,False
+12 EMILOAN UPI,EMI/Loan,False
+12 ENTERTAINMENT UPI,Entertainment,False
+12 FEESANDCHARGES UPI,Fees and Charges,False
+12 FOODDELIVERY UPI,Food Delivery,False
+12 GROCERIES UPI,Groceries,False
+12 HEALTH UPI,Health,False
+12 INSURANCE UPI,Insurance,False
+12 INVESTMENTSIP UPI,Investment/SIP,False
+12 OTHERINCOME UPI,Other Income,False
+12 RENT UPI,Rent,False
+12 SALARY UPI,Salary,False
+12 SHOPPING UPI,Shopping,False
+12 SUBSCRIPTIONS UPI,Subscriptions,False
+12 TRANSFERS UPI,Transfers,False
+12 TRANSPORT UPI,Transport,False
+12 TRAVEL UPI,Travel,False
+12 UNCATEGORISED UPI,Uncategorised,False
+12 UTILITIES UPI,Utilities,False
+13 C@SHWITHDRAWAL STORE,Cash Withdrawal,False
+13 CREDITC@RDPAYMENT STORE,Credit Card Payment,False
+13 DINING STORE,Dining,False
+13 EDUC@TION STORE,Education,False
+13 EMILO@N STORE,EMI/Loan,False
+13 ENTERT@INMENT STORE,Entertainment,False
+13 FEES@NDCHARGES STORE,Fees and Charges,False
+13 FOODDELIVERY STORE,Food Delivery,False
+13 GROCERIES STORE,Groceries,False
+13 HE@LTH STORE,Health,False
+13 INSUR@NCE STORE,Insurance,False
+13 INVESTMENTSIP STORE,Investment/SIP,False
+13 OTHERINCOME STORE,Other Income,False
+13 RENT STORE,Rent,False
+13 S@LARY STORE,Salary,False
+13 SHOPPING STORE,Shopping,False
+13 SUBSCRIPTIONS STORE,Subscriptions,False
+13 TR@NSFERS STORE,Transfers,False
+13 TR@NSPORT STORE,Transport,False
+13 TR@VEL STORE,Travel,False
+13 UNC@TEGORISED STORE,Uncategorised,False
+13 UTILITIES STORE,Utilities,False
+14 CASHWITHDRAWAL ONLINE,Cash Withdrawal,False
+14 CREDITCARDPAYMENT ONLINE,Credit Card Payment,False
+14 DINING ONLINE,Dining,False
+14 EDUCATION ONLINE,Education,False
+14 EMILOAN ONLINE,EMI/Loan,False
+14 ENTERTAINMENT ONLINE,Entertainment,False
+14 FEESANDCHARGES ONLINE,Fees and Charges,False
+14 FOODDELIVERY ONLINE,Food Delivery,False
+14 GROCERIES ONLINE,Groceries,False
+14 HEALTH ONLINE,Health,False
+14 INSURANCE ONLINE,Insurance,False
+14 INVESTMENTSIP ONLINE,Investment/SIP,False
+14 OTHERINCOME ONLINE,Other Income,False
+14 RENT ONLINE,Rent,False
+14 SALARY ONLINE,Salary,False
+14 SHOPPING ONLINE,Shopping,False
+14 SUBSCRIPTIONS ONLINE,Subscriptions,False
+14 TRANSFERS ONLINE,Transfers,False
+14 TRANSPORT ONLINE,Transport,False
+14 TRAVEL ONLINE,Travel,False
+14 UNCATEGORISED ONLINE,Uncategorised,False
+14 UTILITIES ONLINE,Utilities,False
+15 CASHWITHDRAWAL PVT LTD,Cash Withdrawal,False
+15 CREDITCARDPAYMENT PVT LTD,Credit Card Payment,False
+15 DINING PVT LTD,Dining,False
+15 EDUCATION PVT LTD,Education,False
+15 EMILOAN PVT LTD,EMI/Loan,False
+15 ENTERTAINMENT PVT LTD,Entertainment,False
+15 FEESANDCHARGES PVT LTD,Fees and Charges,False
+15 FOODDELIVERY PVT LTD,Food Delivery,False
+15 GROCERIES PVT LTD,Groceries,False
+15 HEALTH PVT LTD,Health,False
+15 INSURANCE PVT LTD,Insurance,False
+15 INVESTMENTSIP PVT LTD,Investment/SIP,False
+15 OTHERINCOME PVT LTD,Other Income,False
+15 RENT PVT LTD,Rent,False
+15 SALARY PVT LTD,Salary,False
+15 SHOPPING PVT LTD,Shopping,False
+15 SUBSCRIPTIONS PVT LTD,Subscriptions,False
+15 TRANSFERS PVT LTD,Transfers,False
+15 TRANSPORT PVT LTD,Transport,False
+15 TRAVEL PVT LTD,Travel,False
+15 UNCATEGORISED PVT LTD,Uncategorised,False
+15 UTILITIES PVT LTD,Utilities,False
+16 CASHWITHDRAWAL,Cash Withdrawal,False
+16 CREDITCARDPAYMENT,Credit Card Payment,False
+16 DINING,Dining,False
+16 EDUCATION,Education,False
+16 EMILOAN,EMI/Loan,False
+16 ENTERTAINMENT,Entertainment,False
+16 FEESANDCHARGES,Fees and Charges,False
+16 FOODDELIVERY,Food Delivery,False
+16 GROCERIES,Groceries,False
+16 HEALTH,Health,False
+16 INSURANCE,Insurance,False
+16 INVESTMENTSIP,Investment/SIP,False
+16 OTHERINCOME,Other Income,False
+16 RENT,Rent,False
+16 SALARY,Salary,False
+16 SHOPPING,Shopping,False
+16 SUBSCRIPTIONS,Subscriptions,False
+16 TRANSFERS,Transfers,False
+16 TRANSPORT,Transport,False
+16 TRAVEL,Travel,False
+16 UNCATEGORISED,Uncategorised,False
+16 UTILITIES,Utilities,False
+17 C@SHWITHDRAWAL UPI,Cash Withdrawal,False
+17 CREDITC@RDPAYMENT UPI,Credit Card Payment,False
+17 DINING UPI,Dining,False
+17 EDUC@TION UPI,Education,False
+17 EMILO@N UPI,EMI/Loan,False
+17 ENTERT@INMENT UPI,Entertainment,False
+17 FEES@NDCHARGES UPI,Fees and Charges,False
+17 FOODDELIVERY UPI,Food Delivery,False
+17 GROCERIES UPI,Groceries,False
+17 HE@LTH UPI,Health,False
+17 INSUR@NCE UPI,Insurance,False
+17 INVESTMENTSIP UPI,Investment/SIP,False
+17 OTHERINCOME UPI,Other Income,False
+17 RENT UPI,Rent,False
+17 S@LARY UPI,Salary,False
+17 SHOPPING UPI,Shopping,False
+17 SUBSCRIPTIONS UPI,Subscriptions,False
+17 TR@NSFERS UPI,Transfers,False
+17 TR@NSPORT UPI,Transport,False
+17 TR@VEL UPI,Travel,False
+17 UNC@TEGORISED UPI,Uncategorised,False
+17 UTILITIES UPI,Utilities,False
+18 CASHWITHDRAWAL STORE,Cash Withdrawal,False
+18 CREDITCARDPAYMENT STORE,Credit Card Payment,False
+18 DINING STORE,Dining,False
+18 EDUCATION STORE,Education,False
+18 EMILOAN STORE,EMI/Loan,False
+18 ENTERTAINMENT STORE,Entertainment,False
+18 FEESANDCHARGES STORE,Fees and Charges,False
+18 FOODDELIVERY STORE,Food Delivery,False
+18 GROCERIES STORE,Groceries,False
+18 HEALTH STORE,Health,False
+18 INSURANCE STORE,Insurance,False
+18 INVESTMENTSIP STORE,Investment/SIP,False
+18 OTHERINCOME STORE,Other Income,False
+18 RENT STORE,Rent,False
+18 SALARY STORE,Salary,False
+18 SHOPPING STORE,Shopping,False
+18 SUBSCRIPTIONS STORE,Subscriptions,False
+18 TRANSFERS STORE,Transfers,False
+18 TRANSPORT STORE,Transport,False
+18 TRAVEL STORE,Travel,False
+18 UNCATEGORISED STORE,Uncategorised,False
+18 UTILITIES STORE,Utilities,False
+19 CASHWITHDRAWAL ONLINE,Cash Withdrawal,False
+19 CREDITCARDPAYMENT ONLINE,Credit Card Payment,False
+19 DINING ONLINE,Dining,False
+19 EDUCATION ONLINE,Education,False
+19 EMILOAN ONLINE,EMI/Loan,False
+19 ENTERTAINMENT ONLINE,Entertainment,False
+19 FEESANDCHARGES ONLINE,Fees and Charges,False
+19 FOODDELIVERY ONLINE,Food Delivery,False
+19 GROCERIES ONLINE,Groceries,False
+19 HEALTH ONLINE,Health,False
+19 INSURANCE ONLINE,Insurance,False
+19 INVESTMENTSIP ONLINE,Investment/SIP,False
+19 OTHERINCOME ONLINE,Other Income,False
+19 RENT ONLINE,Rent,False
+19 SALARY ONLINE,Salary,False
+19 SHOPPING ONLINE,Shopping,False
+19 SUBSCRIPTIONS ONLINE,Subscriptions,False
+19 TRANSFERS ONLINE,Transfers,False
+19 TRANSPORT ONLINE,Transport,False
+19 TRAVEL ONLINE,Travel,False
+19 UNCATEGORISED ONLINE,Uncategorised,False
+19 UTILITIES ONLINE,Utilities,False
+20 CASHWITHDRAWAL PVT LTD,Cash Withdrawal,False
+20 CREDITCARDPAYMENT PVT LTD,Credit Card Payment,False
+20 DINING PVT LTD,Dining,False
+20 EDUCATION PVT LTD,Education,False
+20 EMILOAN PVT LTD,EMI/Loan,False
+20 ENTERTAINMENT PVT LTD,Entertainment,False
+20 FEESANDCHARGES PVT LTD,Fees and Charges,False
+20 FOODDELIVERY PVT LTD,Food Delivery,False
+20 GROCERIES PVT LTD,Groceries,False
+20 HEALTH PVT LTD,Health,False
+20 INSURANCE PVT LTD,Insurance,False
+20 INVESTMENTSIP PVT LTD,Investment/SIP,False
+20 OTHERINCOME PVT LTD,Other Income,False
+20 RENT PVT LTD,Rent,False
+20 SALARY PVT LTD,Salary,False
+20 SHOPPING PVT LTD,Shopping,False
+20 SUBSCRIPTIONS PVT LTD,Subscriptions,False
+20 TRANSFERS PVT LTD,Transfers,False
+20 TRANSPORT PVT LTD,Transport,False
+20 TRAVEL PVT LTD,Travel,False
+20 UNCATEGORISED PVT LTD,Uncategorised,False
+20 UTILITIES PVT LTD,Utilities,False
 ACT FIBERNET INTERNET,utilities,True
 AIRTEL MOBILE BILL,utilities,True
 AMZN PAY IN,shopping,False

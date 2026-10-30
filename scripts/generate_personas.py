@@ -2,6 +2,7 @@
 
 import csv
 import random
+import re
 from calendar import monthrange
 from datetime import date, timedelta
 from pathlib import Path
@@ -90,6 +91,24 @@ PROFILES: dict[str, Profile] = {
         "anomaly": "large_spend",
     },
 }
+
+FIXED_CATEGORIES = (
+    "Salary", "Other Income", "Rent", "Utilities", "Groceries", "Food Delivery",
+    "Dining", "Transport", "Shopping", "Entertainment", "Subscriptions", "Health",
+    "Insurance", "Education", "EMI/Loan", "Credit Card Payment", "Investment/SIP",
+    "Transfers", "Cash Withdrawal", "Fees and Charges", "Travel", "Uncategorised",
+)
+
+
+def _generic_label_rows() -> list[tuple[str, str, bool]]:
+    rows = []
+    for category in FIXED_CATEGORIES:
+        token = re.sub(r"[^A-Z]", "", category.upper()) or "UNKNOWN"
+        for index in range(20):
+            suffix = ["", " UPI", " STORE", " ONLINE", " PVT LTD"][index % 5]
+            spelling = token if index % 4 else token.replace("A", "@", 1)
+            rows.append((f"{index + 1:02d} {spelling}{suffix}", category, False))
+    return rows
 
 
 def _next_weekend(year: int, month: int, day: int) -> date:
@@ -236,13 +255,18 @@ def write_persona(
     output_dir = output_dir or Path("data/synthetic") / persona_id
     output_dir.mkdir(parents=True, exist_ok=True)
     with (output_dir / "transactions.csv").open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=["date", "amount_paise", "description"])
+        writer = csv.DictWriter(
+            handle,
+            fieldnames=["date", "amount_paise", "description", "true_category", "is_recurring"],
+        )
         writer.writeheader()
         writer.writerows(
             {
                 "date": row["date"],
                 "amount_paise": row["amount_paise"],
                 "description": row["description"],
+                "true_category": row["true_category"],
+                "is_recurring": row["is_recurring"],
             }
             for row in generate_persona(persona_id, seed)
         )
@@ -264,7 +288,7 @@ def write_synthetic_labels(
     output_dir: Path = Path("data/labeled"), seed: int = DEFAULT_SEED
 ) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
-    labels: set[tuple[str, str, bool]] = set()
+    labels: set[tuple[str, str, bool]] = set(_generic_label_rows())
     for persona_id in PROFILES:
         for row in generate_persona(persona_id, seed):
             labels.add(

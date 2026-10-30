@@ -3,6 +3,8 @@ import hashlib
 import re
 from typing import Iterable
 
+from app.categorise.cleaner import clean_merchant
+
 
 def _first(row: dict, names: tuple[str, ...]) -> str:
     lowered = {str(key).strip().lower(): value for key, value in row.items()}
@@ -92,11 +94,12 @@ def clean_transactions(
                 "date": transaction_date,
                 "amount_paise": amount_paise,
                 "raw_description": description,
-                "merchant": merchant,
+                "merchant": clean_merchant(description),
                 "category": _first(row, ("category",)),
                 "category_confidence": 0.0,
                 "is_recurring": False,
                 "source": source,
+                "is_self_transfer": str(row.get("is_self_transfer", "")).lower() == "true",
             }
         )
     return cleaned

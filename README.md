@@ -3,10 +3,10 @@
 **Your Financial Health Copilot.** ArthaPilot brings your bank accounts, cards, loans and investments into one clear picture, predicts upcoming cash-flow trouble, and tells you what to do next, with the expected impact of every suggestion.
 
 ![Status](https://img.shields.io/badge/status-in%20development-orange)
-![Phase](https://img.shields.io/badge/phase-1%20complete-blue)
+![Phase](https://img.shields.io/badge/phase-2%20complete-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-> **Project status:** Phase 1 (data layer) is complete. Features below marked "Planned" are not built yet. See the [Roadmap](#roadmap) for exact progress. This README is updated at the end of every phase.
+> **Project status:** Phase 2 (categorisation, recurring and income detection) is complete. Features below marked "Planned" are not built yet. See the [Roadmap](#roadmap) for exact progress. This README is updated at the end of every phase.
 
 ---
 
@@ -51,7 +51,9 @@ Status key: Done, In progress, Planned.
 |---|---|
 | Runnable backend and frontend skeleton, Docker, CI | Done |
 | Three-layer data pipeline (synthetic, Berka, real statements) | Done |
-| Transaction categorisation and recurring-bill detection | Planned |
+| Transaction categorisation | Done |
+| Recurring-bill detection with evidence and next due dates | Done |
+| Income and salary detection | Done |
 | Financial Health Score (0 to 100) with reasons | Planned |
 | Confidence meter with reasons and "how to improve" | Planned |
 | 90-day cash-flow forecast with best, likely and worst bands | Planned |
@@ -101,7 +103,7 @@ ArthaPilot uses three data layers that all feed one common transaction format, s
 | **Berka public banking dataset** | Real anonymised banking patterns | Cash-flow, recurring detection, forecasting and loan logic work on real transaction patterns |
 | **Real anonymised statements** (own and consenting volunteers) | Messy real-world data | Upload parsing and categorisation handle real statements |
 
-Honest notes: the Berka dataset is from a Czech bank and is not in rupees, so it tests cash-flow logic rather than merchant-name categorisation. Synthetic data is used only for scenario testing, never as proof of accuracy. Accuracy numbers come from real and public data only.
+Honest notes: the Berka dataset is from a Czech bank and is not in rupees, so it tests cash-flow logic rather than merchant-name categorisation. Synthetic data is used only for scenario testing, never as proof of accuracy. Real-statement validation was performed locally on a private UPI statement; only aggregate results are published in [the validation report](docs/validation_report.md).
 
 No real user data is ever committed to this repository.
 Real-statement validation is planned for later.
@@ -202,7 +204,7 @@ arthapilot/
 |---|---|---|
 | 0 | Project skeleton: backend, frontend, Docker, CI | Done |
 | 1 | Data layer: personas, Berka loader, upload and cleaning | Done |
-| 2 | Categorisation and recurring/income detection | Next |
+| 2 | Categorisation and recurring/income detection | Done |
 | 3 | Health metrics and 0 to 100 score | Planned |
 | 4 | Data-quality and confidence engine | Planned |
 | 5 | Cash-flow forecast, gap detection, stress tests, backtests | Planned |
@@ -223,8 +225,8 @@ These numbers will be filled in only after they are measured. No figures are cla
 
 | Test | Data used | Result |
 |---|---|---|
-| Categorisation accuracy | Hand-labelled real transactions | To be measured |
-| Recurring-bill detection (precision / recall) | Hand-marked recurring items | To be measured |
+| Categorisation accuracy | Synthetic held-out and private real held-out sets | See [validation report](docs/validation_report.md) |
+| Recurring-bill detection (precision / recall) | Planted synthetic recurring items | See [validation report](docs/validation_report.md) |
 | Forecast error (MAE) | Hold-out backtest on Berka and real data | To be measured |
 | Forecast band coverage (10 to 90 percent) | Same backtest | To be measured |
 | LLM answer faithfulness (answers with zero mismatched numbers) | 30 test questions | To be measured |

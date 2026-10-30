@@ -5,4 +5,5 @@ httpx
 pydantic-settings
 pytest
 sqlalchemy
+scikit-learn
 uvicorn[standard]

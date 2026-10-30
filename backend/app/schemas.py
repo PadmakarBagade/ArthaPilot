@@ -37,6 +37,7 @@ class TransactionRead(SchemaBase):
     category_confidence: float
     is_recurring: bool
     source: str
+    is_self_transfer: bool = False
 
 
 class LoanRead(SchemaBase):
@@ -78,6 +79,15 @@ class RecurringItemRead(SchemaBase):
     next_due_date: date
     confidence: float
     txn_ids: list[str]
+
+
+class ProcessResponse(BaseModel):
+    user_id: str
+    transaction_count: int
+    category_breakdown: dict[str, int]
+    confidence_summary: dict[str, float]
+    recurring_count: int
+    income: dict[str, Any]
 
 
 class GoalRead(SchemaBase):
