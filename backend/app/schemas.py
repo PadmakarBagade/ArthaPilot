@@ -120,6 +120,38 @@ class HealthResponse(BaseModel):
     p2p_outflow_share: float
 
 
+class ConfidenceResponse(BaseModel):
+    score: int
+    level: str
+    reasons: list[str]
+    how_to_improve: list[str]
+    months_of_data: int
+    uncategorised_share: float
+    income_variability: float | None = None
+
+
+class ChatRequest(BaseModel):
+    question: str
+    language: str = "en"
+
+
+class SimulationRequest(BaseModel):
+    type: str
+    category: str | None = None
+    percent: int | None = None
+    merchant: str | None = None
+    amount_paise: int | None = None
+
+
+class AffordabilityRequest(BaseModel):
+    amount_paise: int
+
+
+class GoalRequest(BaseModel):
+    target_paise: int
+    deadline: date
+
+
 class GoalRead(SchemaBase):
     id: str
     user_id: str

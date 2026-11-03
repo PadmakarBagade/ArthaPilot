@@ -1,5 +1,5 @@
 import csv
-from datetime import date
+from datetime import date, timedelta
 from io import BytesIO
 from pathlib import Path
 
@@ -13,12 +13,27 @@ from .db import create_tables, get_db
 from .config import settings
 from .ingestion.cleaning import clean_transactions
 from .ingestion.parser import parse_file
-from .models import Account, Card, Loan, RecurringItem, Transaction, User
-from .schemas import HealthResponse, ProcessResponse, RecurringItemRead, UserRead
+from .models import Account, Card, ChatMessage, Loan, RecurringItem, Transaction, User
+from .schemas import (
+    AffordabilityRequest,
+    ChatRequest,
+    ConfidenceResponse,
+    GoalRequest,
+    HealthResponse,
+    ProcessResponse,
+    RecurringItemRead,
+    SimulationRequest,
+    UserRead,
+)
 from .categorise.cascade import categorise
 from .categorise.rules import UNCATEGORISED
 from .recurring import detect_income, detect_recurring
 from .metrics import compute_health_score
+from .metrics.confidence import compute_confidence
+from .copilot import Answer, answer_question
+from .simulate import affordability, goal_plan, rank_actions, simulate
+from .forecast import build_schedule, detect_gaps, monte_carlo_forecast, stress_test, variable_spend_model
+from .forecast.schemas import ForecastRead, GapRead, StressRead, StressRequest
 
 app = FastAPI(title="ArthaPilot")
 create_tables()
@@ -276,3 +291,143 @@ def health_for_user(
     )
     report["uncategorised_share"] = uncategorised / len(transactions) if transactions else 0.0
     return report
+
+
+def _forecast_state(user_id: str, db: Session, days: int = 90) -> dict:
+    if db.get(User, user_id) is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    transactions = list(db.scalars(select(Transaction).where(Transaction.user_id == user_id)))
+    if not transactions:
+        raise HTTPException(status_code=422, detail="User has no transactions")
+    income = detect_income(transactions)
+    if income.get("salary"):
+        salary_rows = [t for t in transactions if t.txn_id in income["salary"]["txn_ids"]]
+        income["salary"]["day_of_month"] = min((t.date.day for t in salary_rows), default=1)
+    start = max(t.date for t in transactions) + timedelta(days=1)
+    accounts = list(db.scalars(select(Account).where(Account.user_id == user_id)))
+    schedule = build_schedule(
+        list(db.scalars(select(RecurringItem).where(RecurringItem.user_id == user_id))),
+        income, list(db.scalars(select(Loan).where(Loan.user_id == user_id))),
+        list(db.scalars(select(Card).where(Card.user_id == user_id))), start, days,
+    )
+    return {
+        "balance_paise": sum(int(a.balance_paise or 0) for a in accounts),
+        "schedule": schedule,
+        "variable_model": variable_spend_model(transactions),
+        "start_date": start,
+    }
+
+
+@app.get("/users/{user_id}/forecast", response_model=ForecastRead)
+def forecast_for_user(user_id: str, days: int = Query(90, ge=1, le=365),
+                      runs: int = Query(1000, ge=100, le=10000),
+                      seed: int = Query(42), db: Session = Depends(get_db)) -> dict:
+    state = _forecast_state(user_id, db, days)
+    return monte_carlo_forecast(**state, days=days, runs=runs, seed=seed)
+
+
+@app.get("/users/{user_id}/gaps", response_model=list[GapRead])
+def gaps_for_user(user_id: str, safe_threshold_paise: int = Query(0, ge=0),
+                  db: Session = Depends(get_db)) -> list[dict]:
+    state = _forecast_state(user_id, db)
+    return detect_gaps(monte_carlo_forecast(**state), safe_threshold_paise)
+
+
+@app.post("/users/{user_id}/stress-test", response_model=StressRead)
+def stress_test_for_user(user_id: str, request: StressRequest,
+                         db: Session = Depends(get_db)) -> dict:
+    state = _forecast_state(user_id, db)
+    state["new_emi_paise"] = request.new_emi_paise
+    return stress_test(state, request.scenario)
+
+
+@app.get("/users/{user_id}/confidence", response_model=ConfidenceResponse)
+def confidence_for_user(user_id: str, db: Session = Depends(get_db)) -> dict:
+    user = db.get(User, user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    transactions = list(
+        db.scalars(select(Transaction).where(Transaction.user_id == user_id).order_by(Transaction.date))
+    )
+    loans = list(db.scalars(select(Loan).where(Loan.user_id == user_id)))
+    cards = list(db.scalars(select(Card).where(Card.user_id == user_id)))
+    recurring_items = list(db.scalars(select(RecurringItem).where(RecurringItem.user_id == user_id)))
+    return compute_confidence(transactions, loans, cards, recurring_items)
+
+
+@app.post("/users/{user_id}/chat", response_model=Answer)
+def chat_for_user(user_id: str, request: ChatRequest, db: Session = Depends(get_db)) -> Answer:
+    if not request.question.strip():
+        raise HTTPException(status_code=422, detail="Question must not be empty")
+    user = db.get(User, user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    transactions = list(db.scalars(select(Transaction).where(Transaction.user_id == user_id).order_by(Transaction.date)))
+    loans = list(db.scalars(select(Loan).where(Loan.user_id == user_id)))
+    cards = list(db.scalars(select(Card).where(Card.user_id == user_id)))
+    accounts = list(db.scalars(select(Account).where(Account.user_id == user_id)))
+    recurring_items = list(db.scalars(select(RecurringItem).where(RecurringItem.user_id == user_id)))
+    health = compute_health_score(transactions, loans, cards, accounts)
+    confidence = compute_confidence(transactions, loans, cards, recurring_items)
+    answer = answer_question(
+        request.question,
+        health=health,
+        confidence=confidence,
+        recurring=[{
+            "id": item.id,
+            "merchant": item.merchant,
+            "txn_ids": item.txn_ids,
+            "next_due_date": item.next_due_date.isoformat(),
+        } for item in recurring_items],
+    )
+    db.add(ChatMessage(
+        id=f"{user_id}-{len(user.chat_messages) + 1}",
+        user_id=user_id,
+        role="assistant",
+        content=answer.summary,
+        answer_json=answer.model_dump(mode="json"),
+    ))
+    db.commit()
+    return answer
+
+
+def _simulation_state(user: User) -> dict:
+    return {
+        "months": max(1, len({(item.date.year, item.date.month) for item in user.transactions})),
+        "transactions": [
+            {"txn_id": item.txn_id, "amount_paise": item.amount_paise, "category": item.category}
+            for item in user.transactions
+        ],
+        "accounts": [{"type": item.type, "balance_paise": item.balance_paise} for item in user.accounts],
+        "loans": [{"outstanding_paise": item.outstanding_paise, "rate_apr": item.rate_apr} for item in user.loans],
+        "recurring_items": [{"merchant": item.merchant, "txn_ids": item.txn_ids} for item in user.recurring_items],
+    }
+
+
+def _require_user(user_id: str, db: Session) -> User:
+    user = db.get(User, user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+
+@app.post("/users/{user_id}/simulate")
+def simulate_for_user(user_id: str, request: SimulationRequest, db: Session = Depends(get_db)) -> dict:
+    user = _require_user(user_id, db)
+    action = request.model_dump(exclude_none=True)
+    return simulate(_simulation_state(user), action)
+
+
+@app.get("/users/{user_id}/best-moves")
+def best_moves_for_user(user_id: str, db: Session = Depends(get_db)) -> dict:
+    return rank_actions(_simulation_state(_require_user(user_id, db)))
+
+
+@app.post("/users/{user_id}/affordability")
+def affordability_for_user(user_id: str, request: AffordabilityRequest, db: Session = Depends(get_db)) -> dict:
+    return affordability(_simulation_state(_require_user(user_id, db)), request.amount_paise)
+
+
+@app.post("/users/{user_id}/goal")
+def goal_for_user(user_id: str, request: GoalRequest, db: Session = Depends(get_db)) -> dict:
+    return goal_plan(_simulation_state(_require_user(user_id, db)), request.target_paise, request.deadline)

@@ -3,10 +3,10 @@
 **Your Financial Health Copilot.** ArthaPilot brings your bank accounts, cards, loans and investments into one clear picture, predicts upcoming cash-flow trouble, and tells you what to do next, with the expected impact of every suggestion.
 
 ![Status](https://img.shields.io/badge/status-in%20development-orange)
-![Phase](https://img.shields.io/badge/phase-2%20complete-blue)
+![Phase](https://img.shields.io/badge/phase-4%20to%206%20in%20progress-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-> **Project status:** Phase 3 (categorisation, recurring and financial health scoring) is complete. Features below marked "Planned" are not built yet. See the [Roadmap](#roadmap) for exact progress. This README is updated at the end of every phase.
+> **Project status:** Phases 0-3 are implemented, with confidence, forecasting, simulation, and a deterministic copilot vertical slice now in progress. The dashboard and Ask workflow are wired to the backend. Features below marked "Planned" are not yet production-complete. See the [Roadmap](#roadmap) and [end-to-end build plan](plan.md) for exact progress.
 
 ---
 
@@ -55,15 +55,15 @@ Status key: Done, In progress, Planned.
 | Recurring-bill detection with evidence and next due dates | Done |
 | Income and salary detection | Done |
 | Financial Health Score (0 to 100) with reasons | Done (shown only with enough data) |
-| Confidence meter with reasons and "how to improve" | Planned |
-| 90-day cash-flow forecast with best, likely and worst bands | Planned |
+| Confidence meter with reasons and "how to improve" | In progress |
+| 90-day cash-flow forecast with best, likely and worst bands | In progress |
 | Danger Calendar (risky days highlighted) | Planned |
 | Stress tests (income stops, expenses rise, emergency expense) | Planned |
-| Action simulator with before/after impact | Planned |
+| Action simulator with before/after impact | In progress |
 | Best Next Move ranking | Planned |
 | Affordability verdict (Yes / Risky / No) with safer alternatives | Planned |
 | Goal planner | Planned |
-| Conversational copilot with Fact / Prediction / Recommendation cards | Planned |
+| Conversational copilot with Fact / Prediction / Recommendation cards | In progress |
 | Evidence links (click a number to see the transactions behind it) | Planned |
 | Live update with a "What changed" explainer | Planned |
 | Anomaly, duplicate and subscription-creep alerts | Planned |
