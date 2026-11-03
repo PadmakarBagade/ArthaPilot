@@ -43,6 +43,37 @@ export type ChatAnswer = {
   follow_ups: string[];
 };
 
+export type Forecast = {
+  dates: string[];
+  p10_paise: number[];
+  p50_paise: number[];
+  p90_paise: number[];
+  probability_below_zero: number[];
+  runs: number;
+  seed: number;
+  start_balance_paise: number;
+};
+
+export type Gap = {
+  date: string;
+  expected_balance_paise: number;
+  probability_below_zero: number;
+  evidence: string;
+};
+
+export type BestMove = {
+  action: { type: string; category?: string; percent?: number };
+  impact_paise: number;
+  effort_score: number;
+  reason: string;
+};
+
+export type BestMoves = {
+  best_move: BestMove | null;
+  alternatives: BestMove[];
+  evidence_formula: string;
+};
+
 async function getJson<T>(path: string): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, { cache: "no-store" });
   if (!response.ok) {
@@ -71,6 +102,18 @@ export async function askCopilot(userId: string, question: string): Promise<Chat
   });
   if (!response.ok) throw new Error(`Chat request failed (${response.status})`);
   return response.json() as Promise<ChatAnswer>;
+}
+
+export async function getForecast(userId: string): Promise<Forecast> {
+  return getJson<Forecast>(`/users/${encodeURIComponent(userId)}/forecast?days=30&runs=250&seed=42`);
+}
+
+export async function getGaps(userId: string): Promise<Gap[]> {
+  return getJson<Gap[]>(`/users/${encodeURIComponent(userId)}/gaps`);
+}
+
+export async function getBestMoves(userId: string): Promise<BestMoves> {
+  return getJson<BestMoves>(`/users/${encodeURIComponent(userId)}/best-moves`);
 }
 
 export async function checkHealth(): Promise<boolean> {
