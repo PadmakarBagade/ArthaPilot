@@ -2,7 +2,7 @@
 
 import { type FormEvent, useEffect, useState } from "react";
 
-import { askCopilot, ChatAnswer, Confidence, getConfidence, getHealth, Health, listUsers, User } from "@/lib/api";
+import { askCopilot, BestMoves, ChatAnswer, Confidence, Forecast, Gap, getBestMoves, getConfidence, getForecast, getGaps, getHealth, Health, listUsers, User } from "@/lib/api";
 
 export default function Home() {
   const [users, setUsers] = useState<User[]>([]);
@@ -14,6 +14,9 @@ export default function Home() {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<ChatAnswer | null>(null);
   const [asking, setAsking] = useState(false);
+  const [forecast, setForecast] = useState<Forecast | null>(null);
+  const [gaps, setGaps] = useState<Gap[]>([]);
+  const [bestMoves, setBestMoves] = useState<BestMoves | null>(null);
 
   useEffect(() => {
     listUsers()
@@ -26,10 +29,13 @@ export default function Home() {
 
   useEffect(() => {
     if (!selectedUser) return;
-    Promise.all([getHealth(selectedUser), getConfidence(selectedUser)])
-      .then(([nextHealth, nextConfidence]) => {
+    Promise.all([getHealth(selectedUser), getConfidence(selectedUser), getForecast(selectedUser), getGaps(selectedUser), getBestMoves(selectedUser)])
+      .then(([nextHealth, nextConfidence, nextForecast, nextGaps, nextBestMoves]) => {
         setHealth(nextHealth);
         setConfidence(nextConfidence);
+        setForecast(nextForecast);
+        setGaps(nextGaps);
+        setBestMoves(nextBestMoves);
         setError(null);
       })
       .catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "Unable to load dashboard"));
@@ -91,7 +97,29 @@ export default function Home() {
             </div>
           </div>}
         </section>}
-        {activeTab !== "Home" && activeTab !== "Ask" && <section className="rounded-xl border bg-white p-6"><h2 className="text-xl font-semibold">{activeTab}</h2><p className="mt-2 text-slate-600">This workspace is connected to the typed API and will display verified {activeTab.toLowerCase()} results as those services are enabled.</p></section>}
+        {activeTab !== "Home" && activeTab !== "Ask" && activeTab !== "Forecast" && activeTab !== "Plan" && <section className="rounded-xl border bg-white p-6"><h2 className="text-xl font-semibold">{activeTab}</h2><p className="mt-2 text-slate-600">This workspace is connected to the typed API and will display verified {activeTab.toLowerCase()} results as those services are enabled.</p></section>}
+        {activeTab === "Forecast" && <section className="space-y-5 rounded-xl border bg-white p-6">
+          <div><h2 className="text-xl font-semibold">30-day cash-flow outlook</h2><p className="mt-1 text-sm text-slate-600">The chart shows the likely path and the tested 10th–90th percentile range. Values are integer paise from the forecast service.</p></div>
+          {forecast && <div className="overflow-x-auto">
+            <div className="grid min-w-[720px] grid-cols-6 gap-2 text-xs">
+              {forecast.dates.filter((_, index) => index % 5 === 0).map((date, index) => {
+                const sourceIndex = index * 5;
+                const p10 = forecast.p10_paise[sourceIndex];
+                const p50 = forecast.p50_paise[sourceIndex];
+                const p90 = forecast.p90_paise[sourceIndex];
+                const max = Math.max(...forecast.p90_paise.map(Math.abs), 1);
+                return <div key={date} className="rounded-lg bg-slate-50 p-3"><p className="font-medium">{date.slice(5)}</p><div className="mt-3 h-32 flex items-end gap-1"><span className="w-1/3 rounded-t bg-blue-200" style={{ height: `${Math.max(4, Math.abs(p10) / max * 100)}%` }} /><span className="w-1/3 rounded-t bg-blue-600" style={{ height: `${Math.max(4, Math.abs(p50) / max * 100)}%` }} /><span className="w-1/3 rounded-t bg-blue-100" style={{ height: `${Math.max(4, Math.abs(p90) / max * 100)}%` }} /></div><p className="mt-2 text-slate-600">Likely ₹{Math.round(p50 / 100).toLocaleString("en-IN")}</p></div>;
+              })}
+            </div>
+          </div>}
+          <div className="grid gap-3 md:grid-cols-2"><div className="rounded-lg bg-slate-50 p-4"><p className="font-medium">Legend</p><p className="mt-2 text-sm text-slate-600">Dark blue: likely · light blue: forecast range · seed {forecast?.seed ?? "—"} · {forecast?.runs ?? 0} simulations</p></div><div className="rounded-lg bg-red-50 p-4"><p className="font-medium text-red-800">Danger days</p><p className="mt-2 text-sm text-red-700">{gaps.length ? `${gaps.length} days fall below the configured safe threshold.` : "No safe-threshold breaches detected."}</p>{gaps.slice(0, 3).map((gap) => <p key={gap.date} className="mt-1 text-xs">{gap.date}: ₹{Math.round(gap.expected_balance_paise / 100).toLocaleString("en-IN")}</p>)}</div></div>
+        </section>}
+        {activeTab === "Plan" && <section className="space-y-5 rounded-xl border bg-white p-6">
+          <div><h2 className="text-xl font-semibold">Best Next Move</h2><p className="mt-1 text-sm text-slate-600">Recommendations are ranked from deterministic simulated surplus impact divided by effort.</p></div>
+          {bestMoves?.best_move ? <div className="rounded-lg border-l-4 border-emerald-500 bg-emerald-50 p-4"><p className="text-xs font-semibold uppercase text-emerald-700">Recommendation</p><p className="mt-2 font-semibold">{bestMoves.best_move.reason}</p><p className="mt-1 text-sm text-emerald-800">Simulated surplus impact: ₹{Math.round(bestMoves.best_move.impact_paise / 100).toLocaleString("en-IN")} · effort {bestMoves.best_move.effort_score}/10</p></div> : <p className="rounded-lg bg-slate-50 p-4 text-slate-600">No simulated action is available for this profile yet.</p>}
+          {!!bestMoves?.alternatives.length && <div><h3 className="font-medium">Alternatives</h3><ul className="mt-2 space-y-2">{bestMoves.alternatives.map((move) => <li key={move.reason} className="rounded-lg border p-3 text-sm">{move.reason} <span className="text-slate-500">· ₹{Math.round(move.impact_paise / 100).toLocaleString("en-IN")} impact</span></li>)}</ul></div>}
+          <p className="text-xs text-slate-500">Formula evidence: {bestMoves?.evidence_formula ?? "Not available"}</p>
+        </section>}
         {activeTab === "Home" && <section className="space-y-6">
           <div className="grid gap-4 md:grid-cols-3">
             <article className="rounded-xl border bg-white p-5 shadow-sm">
