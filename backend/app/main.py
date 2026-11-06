@@ -23,6 +23,7 @@ from .schemas import (
     ProcessResponse,
     RecurringItemRead,
     SimulationRequest,
+    TransactionRead,
     UserRead,
 )
 from .categorise.cascade import categorise
@@ -267,6 +268,23 @@ def recurring_for_user(user_id: str, db: Session = Depends(get_db)) -> list[Recu
             .where(RecurringItem.user_id == user_id)
             .order_by(RecurringItem.next_due_date)
         )
+    )
+
+
+@app.get("/users/{user_id}/transactions", response_model=list[TransactionRead])
+def transactions_for_user(
+    user_id: str,
+    category: str | None = None,
+    limit: int = Query(100, ge=1, le=500),
+    db: Session = Depends(get_db),
+) -> list[Transaction]:
+    if db.get(User, user_id) is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    query = select(Transaction).where(Transaction.user_id == user_id)
+    if category:
+        query = query.where(Transaction.category == category)
+    return list(
+        db.scalars(query.order_by(Transaction.date.desc(), Transaction.txn_id).limit(limit))
     )
 
 

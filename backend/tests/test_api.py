@@ -82,3 +82,13 @@ def test_load_persona_imports_story_accounts_cards_and_loans():
         assert session.query(Account).filter_by(user_id="priya").count() == 2
         assert session.query(Card).filter_by(user_id="priya").count() == 1
         assert session.query(Loan).filter_by(user_id="priya").count() == 1
+
+
+def test_transactions_endpoint_supports_category_filter():
+    client = TestClient(app)
+    client.post("/users/rahul/load-persona")
+    response = client.get("/users/rahul/transactions", params={"category": "Salary"})
+    assert response.status_code == 200
+    if response.json():
+        assert all(item["category"] == "Salary" for item in response.json())
+    assert client.get("/users/rahul/transactions").json()

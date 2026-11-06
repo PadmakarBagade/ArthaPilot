@@ -2,7 +2,7 @@
 
 import { type FormEvent, useEffect, useState } from "react";
 
-import { askCopilot, BestMoves, ChatAnswer, Confidence, Forecast, Gap, getBestMoves, getConfidence, getForecast, getGaps, getHealth, Health, listUsers, User } from "@/lib/api";
+import { askCopilot, BestMoves, ChatAnswer, Confidence, Forecast, Gap, getBestMoves, getConfidence, getForecast, getGaps, getHealth, getRecurring, getTransactions, Health, listUsers, RecurringItem, Transaction, User } from "@/lib/api";
 
 export default function Home() {
   const [users, setUsers] = useState<User[]>([]);
@@ -17,6 +17,9 @@ export default function Home() {
   const [forecast, setForecast] = useState<Forecast | null>(null);
   const [gaps, setGaps] = useState<Gap[]>([]);
   const [bestMoves, setBestMoves] = useState<BestMoves | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [recurring, setRecurring] = useState<RecurringItem[]>([]);
+  const [evidence, setEvidence] = useState<{ title: string; detail: string } | null>(null);
 
   useEffect(() => {
     listUsers()
@@ -29,13 +32,15 @@ export default function Home() {
 
   useEffect(() => {
     if (!selectedUser) return;
-    Promise.all([getHealth(selectedUser), getConfidence(selectedUser), getForecast(selectedUser), getGaps(selectedUser), getBestMoves(selectedUser)])
-      .then(([nextHealth, nextConfidence, nextForecast, nextGaps, nextBestMoves]) => {
+    Promise.all([getHealth(selectedUser), getConfidence(selectedUser), getForecast(selectedUser), getGaps(selectedUser), getBestMoves(selectedUser), getTransactions(selectedUser), getRecurring(selectedUser)])
+      .then(([nextHealth, nextConfidence, nextForecast, nextGaps, nextBestMoves, nextTransactions, nextRecurring]) => {
         setHealth(nextHealth);
         setConfidence(nextConfidence);
         setForecast(nextForecast);
         setGaps(nextGaps);
         setBestMoves(nextBestMoves);
+        setTransactions(nextTransactions);
+        setRecurring(nextRecurring);
         setError(null);
       })
       .catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "Unable to load dashboard"));
@@ -97,7 +102,15 @@ export default function Home() {
             </div>
           </div>}
         </section>}
-        {activeTab !== "Home" && activeTab !== "Ask" && activeTab !== "Forecast" && activeTab !== "Plan" && <section className="rounded-xl border bg-white p-6"><h2 className="text-xl font-semibold">{activeTab}</h2><p className="mt-2 text-slate-600">This workspace is connected to the typed API and will display verified {activeTab.toLowerCase()} results as those services are enabled.</p></section>}
+        {activeTab === "Spending" && <section className="space-y-5 rounded-xl border bg-white p-6">
+          <div><h2 className="text-xl font-semibold">Spending and recurring bills</h2><p className="mt-1 text-sm text-slate-600">Observed transactions are grouped by backend categories. Select a row to inspect its evidence.</p></div>
+          <div className="grid gap-3 md:grid-cols-3">
+            {Object.entries(transactions.reduce<Record<string, number>>((summary, item) => { if (item.amount_paise < 0) summary[item.category || "Uncategorised"] = (summary[item.category || "Uncategorised"] ?? 0) + Math.abs(item.amount_paise); return summary; }, {})).sort(([, left], [, right]) => right - left).slice(0, 6).map(([category, amount]) => <button type="button" key={category} onClick={() => setEvidence({ title: category, detail: `₹${Math.round(amount / 100).toLocaleString("en-IN")} total debit amount from matching transaction evidence.` })} className="rounded-lg bg-slate-50 p-4 text-left hover:bg-blue-50"><p className="text-sm text-slate-500">{category}</p><p className="mt-1 text-xl font-semibold">₹{Math.round(amount / 100).toLocaleString("en-IN")}</p><p className="mt-1 text-xs text-blue-700">View evidence</p></button>)}
+          </div>
+          <div><h3 className="font-semibold">Recurring obligations</h3><div className="mt-2 grid gap-2 md:grid-cols-2">{recurring.slice(0, 8).map((item) => <button type="button" key={item.id} onClick={() => setEvidence({ title: item.merchant, detail: `₹${Math.round(item.amount_paise / 100).toLocaleString("en-IN")} every ${item.interval_days} days; next due ${item.next_due_date}. Evidence transactions: ${item.txn_ids.join(", ")}` })} className="rounded-lg border p-3 text-left hover:border-blue-400"><div className="flex justify-between gap-3"><span className="font-medium">{item.merchant}</span><span className="text-sm">₹{Math.round(item.amount_paise / 100).toLocaleString("en-IN")}</span></div><p className="mt-1 text-xs text-slate-500">Due {item.next_due_date} · {Math.round(item.confidence * 100)}% detection confidence</p></button>)}</div>{!recurring.length && <p className="mt-2 text-sm text-slate-500">No recurring obligations detected for this profile.</p>}</div>
+          <div className="overflow-x-auto"><table className="min-w-full text-left text-sm"><caption className="sr-only">Recent transactions</caption><thead><tr className="border-b text-xs uppercase text-slate-500"><th className="p-2">Date</th><th className="p-2">Merchant</th><th className="p-2">Category</th><th className="p-2">Amount</th></tr></thead><tbody>{transactions.slice(0, 12).map((item) => <tr key={item.txn_id} className="border-b last:border-0"><td className="p-2">{item.date}</td><td className="p-2">{item.merchant || "Unknown"}</td><td className="p-2">{item.category}</td><td className={`p-2 font-medium ${item.amount_paise < 0 ? "text-red-700" : "text-emerald-700"}`}>{item.amount_paise < 0 ? "-" : "+"}₹{Math.round(Math.abs(item.amount_paise) / 100).toLocaleString("en-IN")}</td></tr>)}</tbody></table></div>
+        </section>}
+        {activeTab !== "Home" && activeTab !== "Ask" && activeTab !== "Forecast" && activeTab !== "Plan" && activeTab !== "Spending" && <section className="rounded-xl border bg-white p-6"><h2 className="text-xl font-semibold">{activeTab}</h2><p className="mt-2 text-slate-600">This workspace is connected to the typed API and will display verified {activeTab.toLowerCase()} results as those services are enabled.</p></section>}
         {activeTab === "Forecast" && <section className="space-y-5 rounded-xl border bg-white p-6">
           <div><h2 className="text-xl font-semibold">30-day cash-flow outlook</h2><p className="mt-1 text-sm text-slate-600">The chart shows the likely path and the tested 10th–90th percentile range. Values are integer paise from the forecast service.</p></div>
           {forecast && <div className="overflow-x-auto">
@@ -120,6 +133,7 @@ export default function Home() {
           {!!bestMoves?.alternatives.length && <div><h3 className="font-medium">Alternatives</h3><ul className="mt-2 space-y-2">{bestMoves.alternatives.map((move) => <li key={move.reason} className="rounded-lg border p-3 text-sm">{move.reason} <span className="text-slate-500">· ₹{Math.round(move.impact_paise / 100).toLocaleString("en-IN")} impact</span></li>)}</ul></div>}
           <p className="text-xs text-slate-500">Formula evidence: {bestMoves?.evidence_formula ?? "Not available"}</p>
         </section>}
+        {evidence && <div className="fixed inset-0 z-10 flex items-end justify-center bg-slate-950/30 p-4 sm:items-center" role="presentation" onClick={() => setEvidence(null)}><aside role="dialog" aria-modal="true" aria-labelledby="evidence-title" onClick={(event) => event.stopPropagation()} className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl"><div className="flex items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-wide text-blue-700">Evidence drawer</p><h2 id="evidence-title" className="mt-1 text-xl font-semibold">{evidence.title}</h2></div><button type="button" aria-label="Close evidence drawer" onClick={() => setEvidence(null)} className="rounded-md px-3 py-2 text-slate-500 hover:bg-slate-100">Close</button></div><p className="mt-4 text-sm leading-6 text-slate-600">{evidence.detail}</p><p className="mt-5 text-xs text-slate-500">Every amount shown here comes from the transaction or recurring-obligation API response.</p></aside></div>}
         {activeTab === "Home" && <section className="space-y-6">
           <div className="grid gap-4 md:grid-cols-3">
             <article className="rounded-xl border bg-white p-5 shadow-sm">
