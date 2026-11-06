@@ -20,8 +20,14 @@ export default function Home() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [recurring, setRecurring] = useState<RecurringItem[]>([]);
   const [evidence, setEvidence] = useState<{ title: string; detail: string } | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(true);
+  const [onboardingStep, setOnboardingStep] = useState(1);
+  const [forecastTable, setForecastTable] = useState(false);
 
   useEffect(() => {
+    if (window.localStorage.getItem("arthapilot-onboarding-complete") === "true") {
+      setShowOnboarding(false);
+    }
     listUsers()
       .then((items) => {
         setUsers(items);
@@ -29,6 +35,11 @@ export default function Home() {
       })
       .catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "Unable to load users"));
   }, []);
+
+  function finishOnboarding() {
+    window.localStorage.setItem("arthapilot-onboarding-complete", "true");
+    setShowOnboarding(false);
+  }
 
   useEffect(() => {
     if (!selectedUser) return;
@@ -113,7 +124,8 @@ export default function Home() {
         {activeTab !== "Home" && activeTab !== "Ask" && activeTab !== "Forecast" && activeTab !== "Plan" && activeTab !== "Spending" && <section className="rounded-xl border bg-white p-6"><h2 className="text-xl font-semibold">{activeTab}</h2><p className="mt-2 text-slate-600">This workspace is connected to the typed API and will display verified {activeTab.toLowerCase()} results as those services are enabled.</p></section>}
         {activeTab === "Forecast" && <section className="space-y-5 rounded-xl border bg-white p-6">
           <div><h2 className="text-xl font-semibold">30-day cash-flow outlook</h2><p className="mt-1 text-sm text-slate-600">The chart shows the likely path and the tested 10th–90th percentile range. Values are integer paise from the forecast service.</p></div>
-          {forecast && <div className="overflow-x-auto">
+          {forecast && <div className="flex items-center justify-between gap-3"><p className="text-sm text-slate-500">Choose a visual or accessible tabular view.</p><button type="button" className="min-h-11 rounded-md border px-3 py-2 text-sm font-medium hover:bg-slate-50" onClick={() => setForecastTable((value) => !value)} aria-pressed={forecastTable}>{forecastTable ? "Show visual view" : "View as table"}</button></div>}
+          {forecast && !forecastTable && <div className="overflow-x-auto">
             <div className="grid min-w-[720px] grid-cols-6 gap-2 text-xs">
               {forecast.dates.filter((_, index) => index % 5 === 0).map((date, index) => {
                 const sourceIndex = index * 5;
@@ -125,6 +137,7 @@ export default function Home() {
               })}
             </div>
           </div>}
+          {forecast && forecastTable && <div className="overflow-x-auto rounded-lg border"><table className="min-w-full text-left text-sm"><caption className="sr-only">Forecast balance table</caption><thead><tr className="border-b bg-slate-50 text-xs uppercase text-slate-500"><th className="p-3">Date</th><th className="p-3">Worst range</th><th className="p-3">Likely</th><th className="p-3">Best range</th><th className="p-3">Below zero probability</th></tr></thead><tbody>{forecast.dates.map((date, index) => <tr key={date} className="border-b last:border-0"><td className="p-3">{date}</td><td className="p-3">₹{Math.round(forecast.p10_paise[index] / 100).toLocaleString("en-IN")}</td><td className="p-3 font-medium">₹{Math.round(forecast.p50_paise[index] / 100).toLocaleString("en-IN")}</td><td className="p-3">₹{Math.round(forecast.p90_paise[index] / 100).toLocaleString("en-IN")}</td><td className="p-3">{Math.round(forecast.probability_below_zero[index] * 100)}%</td></tr>)}</tbody></table></div>}
           <div className="grid gap-3 md:grid-cols-2"><div className="rounded-lg bg-slate-50 p-4"><p className="font-medium">Legend</p><p className="mt-2 text-sm text-slate-600">Dark blue: likely · light blue: forecast range · seed {forecast?.seed ?? "—"} · {forecast?.runs ?? 0} simulations</p></div><div className="rounded-lg bg-red-50 p-4"><p className="font-medium text-red-800">Danger days</p><p className="mt-2 text-sm text-red-700">{gaps.length ? `${gaps.length} days fall below the configured safe threshold.` : "No safe-threshold breaches detected."}</p>{gaps.slice(0, 3).map((gap) => <p key={gap.date} className="mt-1 text-xs">{gap.date}: ₹{Math.round(gap.expected_balance_paise / 100).toLocaleString("en-IN")}</p>)}</div></div>
         </section>}
         {activeTab === "Plan" && <section className="space-y-5 rounded-xl border bg-white p-6">
@@ -134,6 +147,7 @@ export default function Home() {
           <p className="text-xs text-slate-500">Formula evidence: {bestMoves?.evidence_formula ?? "Not available"}</p>
         </section>}
         {evidence && <div className="fixed inset-0 z-10 flex items-end justify-center bg-slate-950/30 p-4 sm:items-center" role="presentation" onClick={() => setEvidence(null)}><aside role="dialog" aria-modal="true" aria-labelledby="evidence-title" onClick={(event) => event.stopPropagation()} className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl"><div className="flex items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-wide text-blue-700">Evidence drawer</p><h2 id="evidence-title" className="mt-1 text-xl font-semibold">{evidence.title}</h2></div><button type="button" aria-label="Close evidence drawer" onClick={() => setEvidence(null)} className="rounded-md px-3 py-2 text-slate-500 hover:bg-slate-100">Close</button></div><p className="mt-4 text-sm leading-6 text-slate-600">{evidence.detail}</p><p className="mt-5 text-xs text-slate-500">Every amount shown here comes from the transaction or recurring-obligation API response.</p></aside></div>}
+        {showOnboarding && <div className="fixed inset-0 z-20 flex items-end justify-center bg-slate-950/40 p-4 sm:items-center"><section role="dialog" aria-modal="true" aria-labelledby="welcome-title" className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl sm:p-8"><div className="flex items-center justify-between"><p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-700">Step {onboardingStep} of 3</p><button type="button" className="rounded-md px-3 py-2 text-sm text-slate-500 hover:bg-slate-100" onClick={finishOnboarding}>Skip</button></div>{onboardingStep === 1 && <div><h2 id="welcome-title" className="mt-4 text-2xl font-semibold">Financial clarity, one step at a time.</h2><p className="mt-3 text-slate-600">Try a demo profile with no signup. ArthaPilot keeps facts, predictions, and recommendations separate.</p><button type="button" className="mt-6 min-h-11 rounded-md bg-blue-700 px-5 py-3 font-medium text-white" onClick={() => setOnboardingStep(2)}>Continue</button></div>}{onboardingStep === 2 && <div><h2 id="welcome-title" className="mt-4 text-2xl font-semibold">Choose a safe demo profile.</h2><p className="mt-3 text-slate-600">Rahul demonstrates cash-flow pressure; Priya demonstrates a healthier profile. You can switch profiles any time.</p><button type="button" className="mt-6 min-h-11 rounded-md bg-blue-700 px-5 py-3 font-medium text-white" onClick={() => { if (!selectedUser && users[0]) setSelectedUser(users[0].id); setOnboardingStep(3); }}>Show me the dashboard</button></div>}{onboardingStep === 3 && <div><h2 id="welcome-title" className="mt-4 text-2xl font-semibold">Start with three places.</h2><ul className="mt-3 list-disc space-y-2 pl-5 text-slate-600"><li>Home shows your verified health score and confidence.</li><li>Forecast shows likely cash-flow risk.</li><li>Ask explains results without calculating money in the model.</li></ul><button type="button" className="mt-6 min-h-11 rounded-md bg-emerald-700 px-5 py-3 font-medium text-white" onClick={finishOnboarding}>Try the demo</button></div>}<div className="mt-6 flex gap-1" aria-label="Onboarding progress">{[1, 2, 3].map((step) => <span key={step} className={`h-1.5 flex-1 rounded-full ${step <= onboardingStep ? "bg-blue-700" : "bg-slate-200"}`} />)}</div></section></div>}
         {activeTab === "Home" && <section className="space-y-6">
           <div className="grid gap-4 md:grid-cols-3">
             <article className="rounded-xl border bg-white p-5 shadow-sm">
