@@ -74,6 +74,26 @@ export type BestMoves = {
   evidence_formula: string;
 };
 
+export type Transaction = {
+  txn_id: string;
+  date: string;
+  amount_paise: number;
+  merchant: string;
+  category: string;
+  category_confidence: number;
+  is_recurring: boolean;
+};
+
+export type RecurringItem = {
+  id: string;
+  merchant: string;
+  amount_paise: number;
+  interval_days: number;
+  next_due_date: string;
+  confidence: number;
+  txn_ids: string[];
+};
+
 async function getJson<T>(path: string): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, { cache: "no-store" });
   if (!response.ok) {
@@ -114,6 +134,14 @@ export async function getGaps(userId: string): Promise<Gap[]> {
 
 export async function getBestMoves(userId: string): Promise<BestMoves> {
   return getJson<BestMoves>(`/users/${encodeURIComponent(userId)}/best-moves`);
+}
+
+export async function getTransactions(userId: string): Promise<Transaction[]> {
+  return getJson<Transaction[]>(`/users/${encodeURIComponent(userId)}/transactions?limit=250`);
+}
+
+export async function getRecurring(userId: string): Promise<RecurringItem[]> {
+  return getJson<RecurringItem[]>(`/users/${encodeURIComponent(userId)}/recurring`);
 }
 
 export async function checkHealth(): Promise<boolean> {
