@@ -2,7 +2,7 @@
 
 import { type FormEvent, useEffect, useState } from "react";
 
-import { askCopilot, BestMoves, ChatAnswer, Confidence, Forecast, Gap, getBestMoves, getConfidence, getForecast, getGaps, getHealth, getRecurring, getTransactions, Health, listUsers, RecurringItem, Transaction, User } from "@/lib/api";
+import { addManualLoan, askCopilot, BestMoves, ChatAnswer, Confidence, Forecast, Gap, getBestMoves, getConfidence, getForecast, getGaps, getHealth, getRecurring, getTransactions, getWhatChanged, Health, listUsers, RecurringItem, Transaction, User, WhatChanged } from "@/lib/api";
 
 export default function Home() {
   const [users, setUsers] = useState<User[]>([]);
@@ -20,6 +20,9 @@ export default function Home() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [recurring, setRecurring] = useState<RecurringItem[]>([]);
   const [evidence, setEvidence] = useState<{ title: string; detail: string } | null>(null);
+  const [whatChanged, setWhatChanged] = useState<WhatChanged | null>(null);
+  const [emiAmount, setEmiAmount] = useState("12000");
+  const [updating, setUpdating] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(true);
   const [onboardingStep, setOnboardingStep] = useState(1);
   const [forecastTable, setForecastTable] = useState(false);
@@ -28,6 +31,7 @@ export default function Home() {
     if (window.localStorage.getItem("arthapilot-onboarding-complete") === "true") {
       setShowOnboarding(false);
     }
+
     listUsers()
       .then((items) => {
         setUsers(items);
@@ -43,8 +47,8 @@ export default function Home() {
 
   useEffect(() => {
     if (!selectedUser) return;
-    Promise.all([getHealth(selectedUser), getConfidence(selectedUser), getForecast(selectedUser), getGaps(selectedUser), getBestMoves(selectedUser), getTransactions(selectedUser), getRecurring(selectedUser)])
-      .then(([nextHealth, nextConfidence, nextForecast, nextGaps, nextBestMoves, nextTransactions, nextRecurring]) => {
+    Promise.all([getHealth(selectedUser), getConfidence(selectedUser), getForecast(selectedUser), getGaps(selectedUser), getBestMoves(selectedUser), getTransactions(selectedUser), getRecurring(selectedUser), getWhatChanged(selectedUser)])
+      .then(([nextHealth, nextConfidence, nextForecast, nextGaps, nextBestMoves, nextTransactions, nextRecurring, nextWhatChanged]) => {
         setHealth(nextHealth);
         setConfidence(nextConfidence);
         setForecast(nextForecast);
@@ -52,6 +56,7 @@ export default function Home() {
         setBestMoves(nextBestMoves);
         setTransactions(nextTransactions);
         setRecurring(nextRecurring);
+        setWhatChanged(nextWhatChanged);
         setError(null);
       })
       .catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "Unable to load dashboard"));
@@ -70,6 +75,26 @@ export default function Home() {
       setError(reason instanceof Error ? reason.message : "Unable to ask copilot");
     } finally {
       setAsking(false);
+    }
+
+  }
+
+  async function addEmi(event: FormEvent) {
+    event.preventDefault();
+    const rupees = Number(emiAmount);
+    if (!selectedUser || !Number.isSafeInteger(rupees) || rupees <= 0) return;
+    setUpdating(true);
+    try {
+      await addManualLoan(selectedUser, rupees * 100, rupees * 100);
+      const [nextHealth, nextConfidence, nextWhatChanged] = await Promise.all([getHealth(selectedUser), getConfidence(selectedUser), getWhatChanged(selectedUser)]);
+      setHealth(nextHealth);
+      setConfidence(nextConfidence);
+      setWhatChanged(nextWhatChanged);
+      setError(null);
+    } catch (reason: unknown) {
+      setError(reason instanceof Error ? reason.message : "Unable to apply scenario");
+    } finally {
+      setUpdating(false);
     }
   }
 
@@ -91,7 +116,7 @@ export default function Home() {
         </header>
 
         <nav className="flex gap-2 overflow-x-auto" aria-label="Primary navigation">
-          {["Home", "Spending", "Forecast", "Ask", "Plan"].map((tab) => (
+          {["Home", "Spending", "Forecast", "Ask", "Plan", "Data"].map((tab) => (
             <button key={tab} type="button" onClick={() => setActiveTab(tab)} className={`rounded-full px-4 py-2 text-sm font-medium ${activeTab === tab ? "bg-blue-700 text-white" : "bg-white text-slate-600 ring-1 ring-slate-200"}`}>{tab}</button>
           ))}
         </nav>
@@ -113,6 +138,11 @@ export default function Home() {
             </div>
           </div>}
         </section>}
+        {activeTab === "Data" && <section className="space-y-5 rounded-xl border bg-white p-6">
+          <div><h2 className="text-xl font-semibold">Add a scenario</h2><p className="mt-1 text-sm text-slate-600">Apply a tested change, then compare the recalculated score and advice.</p></div>
+          <form onSubmit={addEmi} className="flex flex-col gap-3 rounded-lg bg-slate-50 p-4 sm:flex-row sm:items-end"><label className="text-sm font-medium">New monthly EMI (₹)<input className="mt-1 block min-h-11 rounded-md border bg-white px-3" inputMode="numeric" value={emiAmount} onChange={(event) => setEmiAmount(event.target.value)} /></label><button type="submit" disabled={updating} className="min-h-11 rounded-md bg-blue-700 px-4 font-medium text-white disabled:opacity-50">{updating ? "Recalculating..." : "Add EMI scenario"}</button></form>
+          <div className="rounded-lg border-l-4 border-blue-500 bg-blue-50 p-4"><p className="text-xs font-semibold uppercase text-blue-700">What Changed</p><p className="mt-2 text-sm">{whatChanged?.summary ?? "No changes have been recorded yet."}</p>{whatChanged?.score_delta !== null && whatChanged?.score_delta !== undefined && <p className="mt-2 text-sm font-medium">Score delta: {whatChanged.score_delta > 0 ? "+" : ""}{whatChanged.score_delta}</p>}<div className="mt-3 grid gap-2 text-xs text-slate-600 sm:grid-cols-3"><span>New gaps: {whatChanged?.new_gaps.length ?? 0}</span><span>Removed gaps: {whatChanged?.removed_gaps.length ?? 0}</span><span>Advice changed: {whatChanged?.recommendation_changed ? "Yes" : "No"}</span></div></div>
+        </section>}
         {activeTab === "Spending" && <section className="space-y-5 rounded-xl border bg-white p-6">
           <div><h2 className="text-xl font-semibold">Spending and recurring bills</h2><p className="mt-1 text-sm text-slate-600">Observed transactions are grouped by backend categories. Select a row to inspect its evidence.</p></div>
           <div className="grid gap-3 md:grid-cols-3">
@@ -121,7 +151,7 @@ export default function Home() {
           <div><h3 className="font-semibold">Recurring obligations</h3><div className="mt-2 grid gap-2 md:grid-cols-2">{recurring.slice(0, 8).map((item) => <button type="button" key={item.id} onClick={() => setEvidence({ title: item.merchant, detail: `₹${Math.round(item.amount_paise / 100).toLocaleString("en-IN")} every ${item.interval_days} days; next due ${item.next_due_date}. Evidence transactions: ${item.txn_ids.join(", ")}` })} className="rounded-lg border p-3 text-left hover:border-blue-400"><div className="flex justify-between gap-3"><span className="font-medium">{item.merchant}</span><span className="text-sm">₹{Math.round(item.amount_paise / 100).toLocaleString("en-IN")}</span></div><p className="mt-1 text-xs text-slate-500">Due {item.next_due_date} · {Math.round(item.confidence * 100)}% detection confidence</p></button>)}</div>{!recurring.length && <p className="mt-2 text-sm text-slate-500">No recurring obligations detected for this profile.</p>}</div>
           <div className="overflow-x-auto"><table className="min-w-full text-left text-sm"><caption className="sr-only">Recent transactions</caption><thead><tr className="border-b text-xs uppercase text-slate-500"><th className="p-2">Date</th><th className="p-2">Merchant</th><th className="p-2">Category</th><th className="p-2">Amount</th></tr></thead><tbody>{transactions.slice(0, 12).map((item) => <tr key={item.txn_id} className="border-b last:border-0"><td className="p-2">{item.date}</td><td className="p-2">{item.merchant || "Unknown"}</td><td className="p-2">{item.category}</td><td className={`p-2 font-medium ${item.amount_paise < 0 ? "text-red-700" : "text-emerald-700"}`}>{item.amount_paise < 0 ? "-" : "+"}₹{Math.round(Math.abs(item.amount_paise) / 100).toLocaleString("en-IN")}</td></tr>)}</tbody></table></div>
         </section>}
-        {activeTab !== "Home" && activeTab !== "Ask" && activeTab !== "Forecast" && activeTab !== "Plan" && activeTab !== "Spending" && <section className="rounded-xl border bg-white p-6"><h2 className="text-xl font-semibold">{activeTab}</h2><p className="mt-2 text-slate-600">This workspace is connected to the typed API and will display verified {activeTab.toLowerCase()} results as those services are enabled.</p></section>}
+        {activeTab !== "Home" && activeTab !== "Ask" && activeTab !== "Forecast" && activeTab !== "Plan" && activeTab !== "Spending" && activeTab !== "Data" && <section className="rounded-xl border bg-white p-6"><h2 className="text-xl font-semibold">{activeTab}</h2><p className="mt-2 text-slate-600">This workspace is connected to the typed API and will display verified {activeTab.toLowerCase()} results as those services are enabled.</p></section>}
         {activeTab === "Forecast" && <section className="space-y-5 rounded-xl border bg-white p-6">
           <div><h2 className="text-xl font-semibold">30-day cash-flow outlook</h2><p className="mt-1 text-sm text-slate-600">The chart shows the likely path and the tested 10th–90th percentile range. Values are integer paise from the forecast service.</p></div>
           {forecast && <div className="flex items-center justify-between gap-3"><p className="text-sm text-slate-500">Choose a visual or accessible tabular view.</p><button type="button" className="min-h-11 rounded-md border px-3 py-2 text-sm font-medium hover:bg-slate-50" onClick={() => setForecastTable((value) => !value)} aria-pressed={forecastTable}>{forecastTable ? "Show visual view" : "View as table"}</button></div>}
