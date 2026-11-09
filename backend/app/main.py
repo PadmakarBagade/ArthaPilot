@@ -19,8 +19,11 @@ from .schemas import (
     AffordabilityRequest,
     ChatRequest,
     ConfidenceResponse,
+    DebtPayoffRequest,
+    DebtPayoffResponse,
     GoalRequest,
     HealthResponse,
+    InsightResponse,
     ProcessResponse,
     RecurringItemRead,
     SimulationRequest,
@@ -37,7 +40,8 @@ from .recurring import detect_income, detect_recurring
 from .metrics import compute_health_score
 from .metrics.confidence import compute_confidence
 from .copilot import Answer, answer_question
-from .simulate import affordability, goal_plan, rank_actions, simulate
+from .simulate import affordability, debt_payoff_plan, goal_plan, rank_actions, simulate
+from .insights import generate_insights
 from .forecast import build_schedule, detect_gaps, monte_carlo_forecast, stress_test, variable_spend_model
 from .forecast.schemas import ForecastRead, GapRead, StressRead, StressRequest
 
@@ -155,6 +159,7 @@ def load_persona(user_id: str, db: Session = Depends(get_db)) -> dict[str, int |
         rows = list(csv.DictReader(handle))
     user = db.get(User, user_id) or User(id=user_id, name=user_id.title(), source="synthetic")
     db.add(user)
+    db.query(Snapshot).filter(Snapshot.user_id == user_id).delete()
     transactions = clean_transactions(rows, user_id=user_id, source="synthetic")
     account_id = f"{user_id}-primary"
     accounts_file = persona_dir / "accounts.csv"
@@ -378,6 +383,27 @@ def confidence_for_user(user_id: str, db: Session = Depends(get_db)) -> dict:
     return compute_confidence(transactions, loans, cards, recurring_items)
 
 
+def _simulation_state(user: User) -> dict:
+    return {
+        "months": max(1, len({(item.date.year, item.date.month) for item in user.transactions})),
+        "transactions": [
+            {"txn_id": item.txn_id, "amount_paise": item.amount_paise, "category": item.category}
+            for item in user.transactions
+        ],
+        "accounts": [{"type": item.type, "balance_paise": item.balance_paise} for item in user.accounts],
+        "loans": [{"outstanding_paise": item.outstanding_paise, "rate_apr": item.rate_apr, "id": item.id, "emi_paise": item.emi_paise, "type": item.type} for item in user.loans],
+        "cards": [{"outstanding_paise": item.balance_paise, "rate_apr": item.apr, "id": item.id, "min_due_paise": item.min_due_paise, "type": "Credit Card"} for item in user.cards],
+        "recurring_items": [{"merchant": item.merchant, "txn_ids": item.txn_ids, "amount_paise": item.amount_paise} for item in user.recurring_items],
+    }
+
+
+def _require_user(user_id: str, db: Session) -> User:
+    user = db.get(User, user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+
 @app.post("/users/{user_id}/chat", response_model=Answer)
 def chat_for_user(user_id: str, request: ChatRequest, db: Session = Depends(get_db)) -> Answer:
     if not request.question.strip():
@@ -392,6 +418,17 @@ def chat_for_user(user_id: str, request: ChatRequest, db: Session = Depends(get_
     recurring_items = list(db.scalars(select(RecurringItem).where(RecurringItem.user_id == user_id)))
     health = compute_health_score(transactions, loans, cards, accounts)
     confidence = compute_confidence(transactions, loans, cards, recurring_items)
+    
+    gaps_list = []
+    try:
+        fstate = _forecast_state(user_id, db, days=90)
+        fforecast = monte_carlo_forecast(**fstate, days=90, runs=200, seed=42)
+        gaps_list = detect_gaps(fforecast)
+    except Exception:
+        pass
+
+    sim_state = _simulation_state(user)
+
     answer = answer_question(
         request.question,
         health=health,
@@ -399,9 +436,13 @@ def chat_for_user(user_id: str, request: ChatRequest, db: Session = Depends(get_
         recurring=[{
             "id": item.id,
             "merchant": item.merchant,
+            "amount_paise": item.amount_paise,
             "txn_ids": item.txn_ids,
             "next_due_date": item.next_due_date.isoformat(),
         } for item in recurring_items],
+        simulation_state=sim_state,
+        gaps=gaps_list,
+        language=request.language or "en",
     )
     db.add(ChatMessage(
         id=f"{user_id}-{len(user.chat_messages) + 1}",
@@ -414,24 +455,30 @@ def chat_for_user(user_id: str, request: ChatRequest, db: Session = Depends(get_
     return answer
 
 
-def _simulation_state(user: User) -> dict:
-    return {
-        "months": max(1, len({(item.date.year, item.date.month) for item in user.transactions})),
-        "transactions": [
-            {"txn_id": item.txn_id, "amount_paise": item.amount_paise, "category": item.category}
-            for item in user.transactions
-        ],
-        "accounts": [{"type": item.type, "balance_paise": item.balance_paise} for item in user.accounts],
-        "loans": [{"outstanding_paise": item.outstanding_paise, "rate_apr": item.rate_apr} for item in user.loans],
-        "recurring_items": [{"merchant": item.merchant, "txn_ids": item.txn_ids} for item in user.recurring_items],
-    }
+@app.get("/users/{user_id}/insights", response_model=list[InsightResponse])
+def insights_for_user(user_id: str, db: Session = Depends(get_db)) -> list[dict]:
+    user = _require_user(user_id, db)
+    transactions = list(db.scalars(select(Transaction).where(Transaction.user_id == user_id).order_by(Transaction.date)))
+    recurring_items = list(db.scalars(select(RecurringItem).where(RecurringItem.user_id == user_id)))
+    income = detect_income(transactions) if transactions else None
+    return generate_insights(transactions, recurring_items, income)
 
 
-def _require_user(user_id: str, db: Session) -> User:
-    user = db.get(User, user_id)
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
+@app.post("/users/{user_id}/debt-payoff", response_model=DebtPayoffResponse)
+def debt_payoff_for_user(user_id: str, request: DebtPayoffRequest, db: Session = Depends(get_db)) -> dict:
+    user = _require_user(user_id, db)
+    loans = [
+        {"id": item.id, "type": item.type, "outstanding_paise": item.outstanding_paise,
+         "rate_apr": item.rate_apr, "emi_paise": item.emi_paise}
+        for item in user.loans
+    ]
+    cards = [
+        {"id": item.id, "type": "Credit Card", "outstanding_paise": item.balance_paise,
+         "apr": item.apr, "min_due_paise": item.min_due_paise}
+        for item in user.cards
+    ]
+    return debt_payoff_plan(loans, cards, extra_monthly_paise=request.extra_monthly_paise, strategy=request.strategy)
+
 
 
 @app.post("/users/{user_id}/simulate")

@@ -108,3 +108,27 @@ def test_what_changed_records_an_emi_scenario():
     after = client.get("/users/rahul/what-changed")
     assert after.status_code == 200
     assert after.json()["snapshot_id"]
+
+
+def test_insights_endpoint():
+    client = TestClient(app)
+    client.post("/users/rahul/load-persona")
+    response = client.get("/users/rahul/insights")
+    assert response.status_code == 200
+    insights = response.json()
+    assert isinstance(insights, list)
+
+
+def test_debt_payoff_endpoint():
+    client = TestClient(app)
+    client.post("/users/rahul/load-persona")
+    response = client.post(
+        "/users/rahul/debt-payoff",
+        json={"extra_monthly_paise": 500000, "strategy": "avalanche"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["strategy"] == "avalanche"
+    assert "months_saved" in data
+    assert "interest_saved_paise" in data
+

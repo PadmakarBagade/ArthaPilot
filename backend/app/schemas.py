@@ -152,6 +152,34 @@ class GoalRequest(BaseModel):
     deadline: date
 
 
+class DebtPayoffRequest(BaseModel):
+    extra_monthly_paise: int = 0
+    strategy: str = "avalanche"
+
+
+class DebtPayoffResponse(BaseModel):
+    strategy: str
+    baseline_months: int
+    accelerated_months: int
+    months_saved: int
+    baseline_interest_paise: int
+    accelerated_interest_paise: int
+    interest_saved_paise: int
+    payoff_order: list[str]
+    formula: str
+    evidence_debt_ids: list[str]
+
+
+class InsightResponse(BaseModel):
+    type: str
+    title: str
+    message: str
+    severity: str
+    evidence_ids: list[str]
+    data: dict[str, Any]
+
+
+
 class TransactionCreate(BaseModel):
     date: date
     amount_paise: int

@@ -2,7 +2,7 @@ from datetime import date
 
 import pytest
 
-from app.simulate import affordability, goal_plan, rank_actions, simulate
+from app.simulate import affordability, debt_payoff_plan, goal_plan, rank_actions, simulate
 
 
 def state():
@@ -44,3 +44,25 @@ def test_goal_plan_uses_integer_ceiling():
 def test_invalid_action_is_explicit():
     with pytest.raises(ValueError):
         simulate(state(), {"type": "unknown"})
+
+
+def test_debt_payoff_plan_avalanche_and_snowball():
+    loans = [
+        {"id": "l1", "type": "Personal Loan", "outstanding_paise": 10000000, "rate_apr": 16.0, "emi_paise": 500000},
+        {"id": "l2", "type": "Car Loan", "outstanding_paise": 20000000, "rate_apr": 9.5, "emi_paise": 600000},
+    ]
+    cards = [
+        {"id": "c1", "type": "Credit Card", "outstanding_paise": 5000000, "rate_apr": 36.0, "emi_paise": 300000},
+    ]
+
+    # Test avalanche
+    plan_avalanche = debt_payoff_plan(loans, cards, extra_monthly_paise=500000, strategy="avalanche")
+    assert plan_avalanche["months_saved"] > 0
+    assert plan_avalanche["interest_saved_paise"] > 0
+    assert plan_avalanche["payoff_order"][0] == "c1"  # Highest APR (36%) paid first
+
+    # Test snowball
+    plan_snowball = debt_payoff_plan(loans, cards, extra_monthly_paise=500000, strategy="snowball")
+    assert plan_snowball["months_saved"] > 0
+    assert plan_snowball["interest_saved_paise"] > 0
+    assert plan_snowball["payoff_order"][0] == "c1"  # Lowest balance (50k) paid first
