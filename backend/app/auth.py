@@ -74,3 +74,4 @@ def get_current_user(
             detail="Invalid or expired session token",
         )
     return user
+

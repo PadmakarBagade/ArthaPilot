@@ -4,7 +4,8 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
-import { Shield, ArrowRight, AlertCircle } from "lucide-react";
+import { ArrowRight, AlertCircle } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -44,13 +45,8 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-slate-100">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link href="/" className="inline-flex items-center gap-2 mb-4">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
-            <Shield className="h-6 w-6 text-white" />
-          </div>
-          <span className="text-2xl font-black tracking-tight text-white">
-            Artha<span className="text-blue-400">Pilot</span>
-          </span>
+        <Link href="/" className="inline-flex items-center justify-center mb-4 hover:opacity-90 transition-opacity">
+          <Logo size="md" />
         </Link>
         <h2 className="text-2xl font-bold tracking-tight text-white">
           Sign in to your financial copilot

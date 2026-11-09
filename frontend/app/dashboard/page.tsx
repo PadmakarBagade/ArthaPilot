@@ -47,6 +47,7 @@ import { InsightsList } from "@/components/InsightsList";
 import { DataTrustModal } from "@/components/DataTrustModal";
 import { AddDataModal } from "@/components/AddDataModal";
 import { PlanTools } from "@/components/PlanTools";
+import { Logo } from "@/components/Logo";
 import {
   Sparkles,
   ShieldCheck,
@@ -148,6 +149,7 @@ export default function DashboardPage() {
     if (selectedUser) {
       refreshUserData(selectedUser, forecastDays);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedUser, forecastDays]);
 
   // Persona switcher handler
@@ -204,15 +206,7 @@ export default function DashboardPage() {
           {/* Logo & Navigation */}
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2 group">
-              <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-lg shadow-sm shadow-blue-500/20 group-hover:scale-105 transition-transform">
-                A
-              </div>
-              <div className="flex flex-col">
-                <span className="font-black text-lg tracking-tight text-slate-900 leading-none">
-                  Artha<span className="text-blue-600">Pilot</span>
-                </span>
-                <span className="text-[10px] text-slate-500 font-medium">Deterministic Copilot</span>
-              </div>
+              <Logo size="sm" />
             </Link>
 
             <Link
