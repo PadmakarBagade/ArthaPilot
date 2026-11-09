@@ -4,7 +4,7 @@ from datetime import date, timedelta
 from io import BytesIO
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, File, HTTPException, Query, UploadFile
+from fastapi import Depends, FastAPI, File, Header, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from collections import Counter
 from sqlalchemy import select
@@ -12,11 +12,16 @@ from sqlalchemy.orm import Session
 
 from .db import create_tables, get_db
 from .config import settings
+from .auth import create_session, get_current_user, get_user_by_token, hash_password, verify_password
 from .ingestion.cleaning import clean_transactions
 from .ingestion.parser import parse_file
-from .models import Account, Card, ChatMessage, Loan, RecurringItem, Snapshot, Transaction, User
+from .models import Account, Card, ChatMessage, Investment, Loan, RecurringItem, SessionToken, Snapshot, Transaction, User
 from .schemas import (
     AffordabilityRequest,
+    AuthResponse,
+    AuthUserResponse,
+    CardCreate,
+    CardRead,
     ChatRequest,
     ConfidenceResponse,
     DebtPayoffRequest,
@@ -24,6 +29,8 @@ from .schemas import (
     GoalRequest,
     HealthResponse,
     InsightResponse,
+    InvestmentCreate,
+    InvestmentRead,
     ProcessResponse,
     RecurringItemRead,
     SimulationRequest,
@@ -31,6 +38,8 @@ from .schemas import (
     IncomeChange,
     LoanCreate,
     TransactionCreate,
+    UserLoginRequest,
+    UserRegisterRequest,
     WhatChangedResponse,
     UserRead,
 )
@@ -65,6 +74,97 @@ def health() -> dict[str, str]:
 @app.get("/users", response_model=list[UserRead])
 def list_users(db: Session = Depends(get_db)) -> list[User]:
     return list(db.scalars(select(User).order_by(User.id)))
+
+
+@app.post("/auth/register", response_model=AuthResponse)
+def register(request: UserRegisterRequest, db: Session = Depends(get_db)) -> AuthResponse:
+    email_clean = request.email.strip().lower()
+    if not email_clean or "@" not in email_clean:
+        raise HTTPException(status_code=400, detail="A valid email address is required")
+    if len(request.password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+    existing = db.scalar(select(User).where(User.email == email_clean))
+    if existing:
+        raise HTTPException(status_code=400, detail="An account with this email already exists")
+
+    user_id = f"user-{uuid4().hex[:10]}"
+    user = User(
+        id=user_id,
+        name=request.name.strip(),
+        email=email_clean,
+        hashed_password=hash_password(request.password),
+        persona_type=request.persona_type or "custom",
+        source="user",
+    )
+    db.add(user)
+    # Default primary account
+    account_id = f"acc-{uuid4().hex[:8]}"
+    db.add(
+        Account(
+            id=account_id,
+            user_id=user_id,
+            type="savings",
+            institution="Primary Bank Account",
+            balance_paise=5000000,
+        )
+    )
+    db.commit()
+    db.refresh(user)
+
+    token = create_session(db, user_id=user.id)
+    return AuthResponse(token=token, user=user)
+
+
+@app.post("/auth/login", response_model=AuthResponse)
+def login(request: UserLoginRequest, db: Session = Depends(get_db)) -> AuthResponse:
+    email_clean = request.email.strip().lower()
+    user = db.scalar(select(User).where(User.email == email_clean))
+    if not user or not user.hashed_password or not verify_password(request.password, user.hashed_password):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    token = create_session(db, user_id=user.id)
+    return AuthResponse(token=token, user=user)
+
+
+@app.post("/auth/demo-login/{persona_id}", response_model=AuthResponse)
+def demo_login(persona_id: str, db: Session = Depends(get_db)) -> AuthResponse:
+    user = db.get(User, persona_id)
+    if not user:
+        persona_path = Path("data/synthetic") / persona_id
+        if not persona_path.exists():
+            raise HTTPException(status_code=404, detail=f"Persona '{persona_id}' not found")
+        load_persona(persona_id, db=db)
+        user = db.get(User, persona_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="Could not load persona")
+
+    token = create_session(db, user_id=user.id)
+    return AuthResponse(token=token, user=user)
+
+
+@app.get("/auth/me", response_model=AuthUserResponse)
+def get_me(user: User = Depends(get_current_user)) -> User:
+    return user
+
+
+@app.post("/auth/logout")
+def logout(
+    authorization: str | None = Header(None),
+    token: str | None = Query(None),
+    db: Session = Depends(get_db),
+) -> dict[str, str]:
+    raw_token = None
+    if authorization and authorization.startswith("Bearer "):
+        raw_token = authorization.split("Bearer ", 1)[1].strip()
+    elif token:
+        raw_token = token
+    if raw_token:
+        session = db.get(SessionToken, raw_token)
+        if session:
+            db.delete(session)
+            db.commit()
+    return {"status": "logged_out"}
+
 
 
 @app.post("/upload")
@@ -204,6 +304,18 @@ def load_persona(user_id: str, db: Session = Depends(get_db)) -> dict[str, int |
                                 values[field] = date.fromisoformat(values[field])
                         values["user_id"] = user_id
                         db.add(model(**values))
+    # Load investments for persona if present
+    inv_file = persona_dir / "investments.csv"
+    if not inv_file.exists():
+        inv_file = Path(__file__).parents[2] / "data" / "synthetic" / "investments.csv"
+    if inv_file.exists():
+        with inv_file.open(encoding="utf-8", newline="") as handle:
+            for row in csv.DictReader(handle):
+                if row.get("user_id") == user_id:
+                    inv_id = f"inv-{user_id}-{row.get('name', 'SIP')}"
+                    if db.get(Investment, inv_id) is None:
+                        val = int(row.get("value_paise", 0)) if row.get("value_paise") else 0
+                        db.add(Investment(id=inv_id, user_id=user_id, type=row.get("name", "SIP"), value_paise=val, monthly_sip_paise=max(100000, val // 10)))
     for transaction in transactions:
         transaction["account_id"] = account_id
     for transaction in transactions:
@@ -568,6 +680,24 @@ def add_transaction(user_id: str, request: TransactionCreate, db: Session = Depe
     return transaction
 
 
+@app.get("/users/{user_id}/loans")
+def list_loans(user_id: str, db: Session = Depends(get_db)) -> list[dict]:
+    user = _require_user(user_id, db)
+    return [
+        {
+            "id": loan.id,
+            "type": loan.type,
+            "principal_paise": loan.principal_paise,
+            "outstanding_paise": loan.outstanding_paise,
+            "emi_paise": loan.emi_paise,
+            "rate_apr": loan.rate_apr,
+            "tenure_left_months": loan.tenure_left_months,
+            "next_due_date": loan.next_due_date.isoformat() if loan.next_due_date else None,
+        }
+        for loan in user.loans
+    ]
+
+
 @app.post("/users/{user_id}/loans")
 def add_loan(user_id: str, request: LoanCreate, db: Session = Depends(get_db)) -> dict:
     user = _require_user(user_id, db)
@@ -582,6 +712,54 @@ def add_loan(user_id: str, request: LoanCreate, db: Session = Depends(get_db)) -
     db.add(loan)
     db.commit()
     return {"id": loan.id, "status": "created"}
+
+
+@app.get("/users/{user_id}/cards", response_model=list[CardRead])
+def list_cards(user_id: str, db: Session = Depends(get_db)) -> list[Card]:
+    user = _require_user(user_id, db)
+    return list(db.scalars(select(Card).where(Card.user_id == user.id)))
+
+
+@app.post("/users/{user_id}/cards", response_model=CardRead)
+def add_card(user_id: str, request: CardCreate, db: Session = Depends(get_db)) -> Card:
+    user = _require_user(user_id, db)
+    _save_snapshot(user, db)
+    card = Card(
+        id=str(uuid4()),
+        user_id=user.id,
+        limit_paise=request.limit_paise,
+        balance_paise=request.balance_paise,
+        apr=request.apr,
+        min_due_paise=request.min_due_paise,
+        due_date=request.due_date,
+    )
+    db.add(card)
+    db.commit()
+    db.refresh(card)
+    return card
+
+
+@app.get("/users/{user_id}/investments", response_model=list[InvestmentRead])
+def list_investments(user_id: str, db: Session = Depends(get_db)) -> list[Investment]:
+    user = _require_user(user_id, db)
+    return list(db.scalars(select(Investment).where(Investment.user_id == user.id)))
+
+
+@app.post("/users/{user_id}/investments", response_model=InvestmentRead)
+def add_investment(user_id: str, request: InvestmentCreate, db: Session = Depends(get_db)) -> Investment:
+    user = _require_user(user_id, db)
+    _save_snapshot(user, db)
+    inv = Investment(
+        id=str(uuid4()),
+        user_id=user.id,
+        type=request.type,
+        value_paise=request.value_paise,
+        monthly_sip_paise=request.monthly_sip_paise,
+    )
+    db.add(inv)
+    db.commit()
+    db.refresh(inv)
+    return inv
 
 
 @app.post("/users/{user_id}/income-change", response_model=TransactionRead)

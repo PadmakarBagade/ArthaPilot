@@ -11,6 +11,7 @@ class SchemaBase(BaseModel):
 class UserRead(SchemaBase):
     id: str
     name: str
+    email: str | None = None
     persona_type: str | None = None
     created_at: datetime
     source: str = "synthetic"
@@ -240,3 +241,62 @@ class ChatMessageRead(SchemaBase):
     content: str
     answer_json: dict[str, Any] | None = None
     created_at: datetime
+
+
+class UserRegisterRequest(BaseModel):
+    name: str
+    email: str
+    password: str
+    persona_type: str | None = None
+
+
+class UserLoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+class AuthUserResponse(SchemaBase):
+    id: str
+    name: str
+    email: str | None = None
+    persona_type: str | None = None
+    source: str = "user"
+    created_at: datetime
+
+
+class AuthResponse(BaseModel):
+    token: str
+    user: AuthUserResponse
+
+
+class CardRead(SchemaBase):
+    id: str
+    user_id: str
+    limit_paise: int
+    balance_paise: int
+    apr: float
+    min_due_paise: int
+    due_date: date | None = None
+
+
+class CardCreate(BaseModel):
+    limit_paise: int
+    balance_paise: int
+    apr: float = 36.0
+    min_due_paise: int = 0
+    due_date: date | None = None
+
+
+class InvestmentRead(SchemaBase):
+    id: str
+    user_id: str
+    type: str
+    value_paise: int
+    monthly_sip_paise: int = 0
+
+
+class InvestmentCreate(BaseModel):
+    type: str = "Mutual Fund SIP"
+    value_paise: int
+    monthly_sip_paise: int = 0
+

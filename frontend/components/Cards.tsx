@@ -100,14 +100,14 @@ export function RecommendationCard({ text, impact, onSimulate }: RecommendationC
 }
 
 interface VerdictCardProps {
-  verdict: "Yes" | "Risky" | "No";
+  verdict: "Yes" | "Risky" | "No" | string;
   title?: string;
   reason?: string;
   saferAlternative?: string | null;
 }
 
 export function VerdictCard({ verdict, title, reason, saferAlternative }: VerdictCardProps) {
-  const configs = {
+  const configs: Record<string, { border: string; bg: string; text: string; badge: string; icon: React.ComponentType<{ className?: string }>; label: string }> = {
     Yes: {
       border: "border-emerald-500",
       bg: "bg-emerald-50",

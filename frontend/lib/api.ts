@@ -3,8 +3,32 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 export type User = {
   id: string;
   name: string;
+  email?: string | null;
   persona_type: string | null;
   source: string;
+};
+
+export type AuthResponse = {
+  token: string;
+  user: User;
+};
+
+export type Card = {
+  id: string;
+  user_id: string;
+  limit_paise: number;
+  balance_paise: number;
+  apr: number;
+  min_due_paise: number;
+  due_date?: string | null;
+};
+
+export type Investment = {
+  id: string;
+  user_id: string;
+  type: string;
+  value_paise: number;
+  monthly_sip_paise: number;
 };
 
 export type Health = {
@@ -341,3 +365,88 @@ export async function checkHealth(): Promise<boolean> {
     return false;
   }
 }
+
+export async function registerUser(name: string, email: string, password: string): Promise<AuthResponse> {
+  const response = await fetch(`${API_URL}/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, password }),
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.detail || "Registration failed");
+  }
+  return response.json();
+}
+
+export async function loginUser(email: string, password: string): Promise<AuthResponse> {
+  const response = await fetch(`${API_URL}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.detail || "Invalid email or password");
+  }
+  return response.json();
+}
+
+export async function demoLogin(personaId: string): Promise<AuthResponse> {
+  const response = await fetch(`${API_URL}/auth/demo-login/${encodeURIComponent(personaId)}`, {
+    method: "POST",
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.detail || "Demo login failed");
+  }
+  return response.json();
+}
+
+export async function getMe(token: string): Promise<User> {
+  const response = await fetch(`${API_URL}/auth/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error("Session expired");
+  return response.json();
+}
+
+export async function logoutUser(token?: string): Promise<void> {
+  try {
+    await fetch(`${API_URL}/auth/logout`, {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
+  } catch {
+    // Ignore network error on logout
+  }
+}
+
+export async function getCards(userId: string): Promise<Card[]> {
+  return getJson<Card[]>(`/users/${encodeURIComponent(userId)}/cards`);
+}
+
+export async function addCard(userId: string, card: { limit_paise: number; balance_paise: number; apr?: number; min_due_paise?: number }): Promise<Card> {
+  const response = await fetch(`${API_URL}/users/${encodeURIComponent(userId)}/cards`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(card),
+  });
+  if (!response.ok) throw new Error(`Add card failed (${response.status})`);
+  return response.json();
+}
+
+export async function getInvestments(userId: string): Promise<Investment[]> {
+  return getJson<Investment[]>(`/users/${encodeURIComponent(userId)}/investments`);
+}
+
+export async function addInvestment(userId: string, investment: { type: string; value_paise: number; monthly_sip_paise?: number }): Promise<Investment> {
+  const response = await fetch(`${API_URL}/users/${encodeURIComponent(userId)}/investments`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(investment),
+  });
+  if (!response.ok) throw new Error(`Add investment failed (${response.status})`);
+  return response.json();
+}
+
