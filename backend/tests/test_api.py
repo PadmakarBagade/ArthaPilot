@@ -92,3 +92,19 @@ def test_transactions_endpoint_supports_category_filter():
     if response.json():
         assert all(item["category"] == "Salary" for item in response.json())
     assert client.get("/users/rahul/transactions").json()
+
+
+def test_what_changed_records_an_emi_scenario():
+    client = TestClient(app)
+    client.post("/users/rahul/load-persona")
+    before = client.get("/users/rahul/what-changed")
+    assert before.status_code == 200
+    assert before.json()["snapshot_id"] is None
+    response = client.post(
+        "/users/rahul/loans",
+        json={"outstanding_paise": 1200000, "emi_paise": 120000, "type": "Scenario EMI"},
+    )
+    assert response.status_code == 200
+    after = client.get("/users/rahul/what-changed")
+    assert after.status_code == 200
+    assert after.json()["snapshot_id"]

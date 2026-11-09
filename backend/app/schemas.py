@@ -152,6 +152,42 @@ class GoalRequest(BaseModel):
     deadline: date
 
 
+class TransactionCreate(BaseModel):
+    date: date
+    amount_paise: int
+    category: str
+    merchant: str = "Manual entry"
+    description: str = "Manual entry"
+
+
+class LoanCreate(BaseModel):
+    type: str = "Personal loan"
+    outstanding_paise: int
+    emi_paise: int
+    rate_apr: float = 0.0
+    next_due_date: date | None = None
+
+
+class IncomeChange(BaseModel):
+    amount_paise: int
+    date: date
+    description: str = "Income change"
+
+
+class WhatChangedResponse(BaseModel):
+    snapshot_id: str | None
+    score_before: float | None
+    score_after: float | None
+    score_delta: float | None
+    confidence_before: int | None
+    confidence_after: int | None
+    new_gaps: list[str]
+    removed_gaps: list[str]
+    recommendation_changed: bool
+    summary: str
+    evidence: list[str]
+
+
 class GoalRead(SchemaBase):
     id: str
     user_id: str

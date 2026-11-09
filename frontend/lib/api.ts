@@ -94,6 +94,20 @@ export type RecurringItem = {
   txn_ids: string[];
 };
 
+export type WhatChanged = {
+  snapshot_id: string | null;
+  score_before: number | null;
+  score_after: number | null;
+  score_delta: number | null;
+  confidence_before: number | null;
+  confidence_after: number | null;
+  new_gaps: string[];
+  removed_gaps: string[];
+  recommendation_changed: boolean;
+  summary: string;
+  evidence: string[];
+};
+
 async function getJson<T>(path: string): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, { cache: "no-store" });
   if (!response.ok) {
@@ -142,6 +156,19 @@ export async function getTransactions(userId: string): Promise<Transaction[]> {
 
 export async function getRecurring(userId: string): Promise<RecurringItem[]> {
   return getJson<RecurringItem[]>(`/users/${encodeURIComponent(userId)}/recurring`);
+}
+
+export async function getWhatChanged(userId: string): Promise<WhatChanged> {
+  return getJson<WhatChanged>(`/users/${encodeURIComponent(userId)}/what-changed`);
+}
+
+export async function addManualLoan(userId: string, outstanding_paise: number, emi_paise: number): Promise<void> {
+  const response = await fetch(`${API_URL}/users/${encodeURIComponent(userId)}/loans`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ outstanding_paise, emi_paise, type: "Manual EMI" }),
+  });
+  if (!response.ok) throw new Error(`Loan update failed (${response.status})`);
 }
 
 export async function checkHealth(): Promise<boolean> {

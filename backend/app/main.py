@@ -1,4 +1,5 @@
 import csv
+from uuid import uuid4
 from datetime import date, timedelta
 from io import BytesIO
 from pathlib import Path
@@ -13,7 +14,7 @@ from .db import create_tables, get_db
 from .config import settings
 from .ingestion.cleaning import clean_transactions
 from .ingestion.parser import parse_file
-from .models import Account, Card, ChatMessage, Loan, RecurringItem, Transaction, User
+from .models import Account, Card, ChatMessage, Loan, RecurringItem, Snapshot, Transaction, User
 from .schemas import (
     AffordabilityRequest,
     ChatRequest,
@@ -24,6 +25,10 @@ from .schemas import (
     RecurringItemRead,
     SimulationRequest,
     TransactionRead,
+    IncomeChange,
+    LoanCreate,
+    TransactionCreate,
+    WhatChangedResponse,
     UserRead,
 )
 from .categorise.cascade import categorise
@@ -449,3 +454,137 @@ def affordability_for_user(user_id: str, request: AffordabilityRequest, db: Sess
 @app.post("/users/{user_id}/goal")
 def goal_for_user(user_id: str, request: GoalRequest, db: Session = Depends(get_db)) -> dict:
     return goal_plan(_simulation_state(_require_user(user_id, db)), request.target_paise, request.deadline)
+
+
+def _snapshot_payload(user: User, db: Session) -> dict:
+    transactions = list(db.scalars(select(Transaction).where(Transaction.user_id == user.id).order_by(Transaction.date)))
+    loans = list(db.scalars(select(Loan).where(Loan.user_id == user.id)))
+    cards = list(db.scalars(select(Card).where(Card.user_id == user.id)))
+    accounts = list(db.scalars(select(Account).where(Account.user_id == user.id)))
+    health = compute_health_score(transactions, loans, cards, accounts)
+    confidence = compute_confidence(
+        transactions, loans, cards,
+        list(db.scalars(select(RecurringItem).where(RecurringItem.user_id == user.id))),
+    )
+    try:
+        forecast = monte_carlo_forecast(**_forecast_state(user.id, db, 30), days=30, runs=250, seed=42)
+        forecast = {key: ([value.isoformat() for value in value_list] if key == "dates" else value_list) for key, value_list in forecast.items()}
+        gaps = [item["date"].isoformat() for item in detect_gaps(forecast)]
+    except HTTPException:
+        forecast = {}
+        gaps = []
+    moves = rank_actions(_simulation_state(user))
+    return {
+        "health": {"total_score": health.get("total_score"), "band": health.get("band")},
+        "confidence": {"score": confidence.get("score")},
+        "forecast": forecast,
+        "gaps": gaps,
+        "recommendation": moves.get("best_move", {}).get("reason") if moves.get("best_move") else None,
+    }
+
+
+def _save_snapshot(user: User, db: Session) -> Snapshot:
+    snapshot = Snapshot(
+        id=str(uuid4()),
+        user_id=user.id,
+        metrics_json=_snapshot_payload(user, db),
+        forecast_json={},
+        recommendations_json={},
+    )
+    db.add(snapshot)
+    db.flush()
+    return snapshot
+
+
+@app.post("/users/{user_id}/transactions", response_model=TransactionRead)
+def add_transaction(user_id: str, request: TransactionCreate, db: Session = Depends(get_db)) -> Transaction:
+    user = _require_user(user_id, db)
+    account = user.accounts[0] if user.accounts else None
+    if account is None:
+        raise HTTPException(status_code=422, detail="User has no account for this transaction")
+    _save_snapshot(user, db)
+    transaction = Transaction(
+        txn_id=str(uuid4()),
+        user_id=user.id,
+        account_id=account.id,
+        date=request.date,
+        amount_paise=request.amount_paise,
+        raw_description=request.description,
+        merchant=request.merchant,
+        category=request.category,
+        category_confidence=1.0,
+        source="manual",
+    )
+    db.add(transaction)
+    db.commit()
+    db.refresh(transaction)
+    return transaction
+
+
+@app.post("/users/{user_id}/loans")
+def add_loan(user_id: str, request: LoanCreate, db: Session = Depends(get_db)) -> dict:
+    user = _require_user(user_id, db)
+    if request.outstanding_paise < 0 or request.emi_paise < 0:
+        raise HTTPException(status_code=422, detail="Loan amounts must not be negative")
+    _save_snapshot(user, db)
+    loan = Loan(
+        id=str(uuid4()), user_id=user.id, type=request.type,
+        principal_paise=request.outstanding_paise, outstanding_paise=request.outstanding_paise,
+        emi_paise=request.emi_paise, rate_apr=request.rate_apr, next_due_date=request.next_due_date,
+    )
+    db.add(loan)
+    db.commit()
+    return {"id": loan.id, "status": "created"}
+
+
+@app.post("/users/{user_id}/income-change", response_model=TransactionRead)
+def add_income_change(user_id: str, request: IncomeChange, db: Session = Depends(get_db)) -> Transaction:
+    user = _require_user(user_id, db)
+    account = user.accounts[0] if user.accounts else None
+    if account is None:
+        raise HTTPException(status_code=422, detail="User has no account for this income change")
+    if request.amount_paise <= 0:
+        raise HTTPException(status_code=422, detail="Income amount must be positive")
+    _save_snapshot(user, db)
+    transaction = Transaction(
+        txn_id=str(uuid4()), user_id=user.id, account_id=account.id, date=request.date,
+        amount_paise=request.amount_paise, raw_description=request.description,
+        merchant="Manual income", category="Other Income", category_confidence=1.0, source="manual",
+    )
+    db.add(transaction)
+    db.commit()
+    db.refresh(transaction)
+    return transaction
+
+
+@app.get("/users/{user_id}/what-changed", response_model=WhatChangedResponse)
+def what_changed(user_id: str, db: Session = Depends(get_db)) -> dict:
+    user = _require_user(user_id, db)
+    latest = db.scalars(
+        select(Snapshot).where(Snapshot.user_id == user.id).order_by(Snapshot.created_at.desc())
+    ).first()
+    if latest is None:
+        return {
+            "snapshot_id": None, "score_before": None, "score_after": None, "score_delta": None,
+            "confidence_before": None, "confidence_after": None, "new_gaps": [], "removed_gaps": [],
+            "recommendation_changed": False, "summary": "No changes have been recorded yet.",
+            "evidence": [],
+        }
+    before = latest.metrics_json
+    after = _snapshot_payload(user, db)
+    before_gaps = set(before.get("gaps", []))
+    after_gaps = set(after.get("gaps", []))
+    before_score = before.get("health", {}).get("total_score")
+    after_score = after.get("health", {}).get("total_score")
+    delta = round(after_score - before_score, 2) if before_score is not None and after_score is not None else None
+    summary = "Your latest change was applied and the analysis was recalculated."
+    if delta is not None:
+        summary += f" Health score changed from {before_score} to {after_score}."
+    return {
+        "snapshot_id": latest.id, "score_before": before_score, "score_after": after_score,
+        "score_delta": delta, "confidence_before": before.get("confidence", {}).get("score"),
+        "confidence_after": after.get("confidence", {}).get("score"),
+        "new_gaps": sorted(after_gaps - before_gaps), "removed_gaps": sorted(before_gaps - after_gaps),
+        "recommendation_changed": before.get("recommendation") != after.get("recommendation"),
+        "summary": summary, "evidence": [latest.id],
+    }
