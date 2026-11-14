@@ -494,21 +494,34 @@ def _forecast_state(user_id: str, db: Session, days: int = 90) -> dict:
     if db.get(User, user_id) is None:
         raise HTTPException(status_code=404, detail="User not found")
     transactions = list(db.scalars(select(Transaction).where(Transaction.user_id == user_id)))
+    accounts = list(db.scalars(select(Account).where(Account.user_id == user_id)))
+    balance_paise = sum(int(a.balance_paise or 0) for a in accounts)
+
     if not transactions:
-        raise HTTPException(status_code=422, detail="User has no transactions")
+        start = date.today()
+        recurring = list(db.scalars(select(RecurringItem).where(RecurringItem.user_id == user_id)))
+        loans = list(db.scalars(select(Loan).where(Loan.user_id == user_id)))
+        cards = list(db.scalars(select(Card).where(Card.user_id == user_id)))
+        schedule = build_schedule(recurring, {}, loans, cards, start, days)
+        return {
+            "balance_paise": balance_paise,
+            "schedule": schedule,
+            "variable_model": {"samples_paise": [], "weekday_averages_paise": {}},
+            "start_date": start,
+        }
+
     income = detect_income(transactions)
     if income.get("salary"):
         salary_rows = [t for t in transactions if t.txn_id in income["salary"]["txn_ids"]]
         income["salary"]["day_of_month"] = min((t.date.day for t in salary_rows), default=1)
     start = max(t.date for t in transactions) + timedelta(days=1)
-    accounts = list(db.scalars(select(Account).where(Account.user_id == user_id)))
     schedule = build_schedule(
         list(db.scalars(select(RecurringItem).where(RecurringItem.user_id == user_id))),
         income, list(db.scalars(select(Loan).where(Loan.user_id == user_id))),
         list(db.scalars(select(Card).where(Card.user_id == user_id))), start, days,
     )
     return {
-        "balance_paise": sum(int(a.balance_paise or 0) for a in accounts),
+        "balance_paise": balance_paise,
         "schedule": schedule,
         "variable_model": variable_spend_model(transactions),
         "start_date": start,
