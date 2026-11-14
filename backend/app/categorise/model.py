@@ -38,8 +38,12 @@ def train_model(
     categories: list[str] = []
     with Path(dataset_path).open(newline="", encoding="utf-8") as handle:
         for row in csv.DictReader(handle):
-            descriptions.append(row["raw_description"])
-            categories.append(_CATEGORY_NAMES.get(row["true_category"], UNCATEGORISED))
+            cat = row.get("true_category", "").strip()
+            # Map legacy lowercase aliases if present, or use canonical category directly
+            cat = _CATEGORY_NAMES.get(cat, cat)
+            if cat and cat != UNCATEGORISED:
+                descriptions.append(row["raw_description"])
+                categories.append(cat)
 
     if not descriptions:
         raise ValueError("training dataset is empty")

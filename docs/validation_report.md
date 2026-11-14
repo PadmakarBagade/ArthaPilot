@@ -10,51 +10,51 @@ Results contain counts and percentages only.
 
 - Rows evaluated: 94
 - Rows excluded (`Uncategorised` labels): 4
-- Accuracy: 22 / 90 (24.44%)
-- Coverage: 24.47%
-- Layer counts: rules=23, ml=0, uncategorised=71
+- Accuracy: 80 / 90 (88.89%)
+- Coverage: 86.17%
+- Layer counts: rules=23, ml=58, uncategorised=13
 
 | Category | Precision | Recall | Support |
 |---|---:|---:|---:|
-| Cash Withdrawal | 0.00% | 0.00% | 6 |
-| Credit Card Payment | 0.00% | 0.00% | 4 |
-| Dining | 0.00% | 0.00% | 8 |
-| EMI/Loan | 0.00% | 0.00% | 7 |
-| Education | 0.00% | 0.00% | 1 |
-| Entertainment | 0.00% | 0.00% | 3 |
+| Cash Withdrawal | 100.00% | 100.00% | 6 |
+| Credit Card Payment | 80.00% | 100.00% | 4 |
+| Dining | 100.00% | 100.00% | 8 |
+| EMI/Loan | 100.00% | 42.86% | 7 |
+| Education | 100.00% | 100.00% | 1 |
+| Entertainment | 100.00% | 100.00% | 3 |
 | Food Delivery | 100.00% | 63.64% | 11 |
-| Groceries | 0.00% | 0.00% | 8 |
-| Insurance | 100.00% | 60.00% | 5 |
-| Investment/SIP | 0.00% | 0.00% | 4 |
+| Groceries | 100.00% | 100.00% | 8 |
+| Insurance | 100.00% | 100.00% | 5 |
+| Investment/SIP | 100.00% | 100.00% | 4 |
 | Rent | 100.00% | 100.00% | 5 |
 | Salary | 100.00% | 85.71% | 7 |
 | Shopping | 0.00% | 0.00% | 1 |
-| Transport | 0.00% | 0.00% | 6 |
-| Travel | 0.00% | 0.00% | 5 |
+| Transport | 100.00% | 100.00% | 6 |
+| Travel | 100.00% | 100.00% | 5 |
 | Uncategorised | 0.00% | 0.00% | 0 |
-| Utilities | 100.00% | 11.11% | 9 |
+| Utilities | 100.00% | 100.00% | 9 |
 
 Confusion matrix (rows = actual, columns = predicted):
 
 | Actual \ Predicted | Cash Withdrawal | Credit Card Payment | Dining | EMI/Loan | Education | Entertainment | Food Delivery | Groceries | Insurance | Investment/SIP | Rent | Salary | Shopping | Transport | Travel | Uncategorised | Utilities |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Cash Withdrawal | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 | 0 |
-| Credit Card Payment | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 0 |
-| Dining | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 8 | 0 |
-| EMI/Loan | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 | 0 |
-| Education | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
-| Entertainment | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
+| Cash Withdrawal | 6 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| Credit Card Payment | 0 | 4 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| Dining | 0 | 0 | 8 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| EMI/Loan | 0 | 1 | 0 | 3 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
+| Education | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| Entertainment | 0 | 0 | 0 | 0 | 0 | 3 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | Food Delivery | 0 | 0 | 0 | 0 | 0 | 0 | 7 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 0 |
-| Groceries | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 8 | 0 |
-| Insurance | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | 0 |
-| Investment/SIP | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 0 |
+| Groceries | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 8 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| Insurance | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| Investment/SIP | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | Rent | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 5 | 0 | 0 | 0 | 0 | 0 | 0 |
 | Salary | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 | 0 | 0 | 0 | 1 | 0 |
 | Shopping | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
-| Transport | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 | 0 |
-| Travel | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 5 | 0 |
+| Transport | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 | 0 | 0 | 0 |
+| Travel | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 5 | 0 | 0 |
 | Uncategorised | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| Utilities | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 8 | 1 |
+| Utilities | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 9 |
 
 ### Real held-out
 
@@ -100,16 +100,3 @@ Confusion matrix (rows = actual, columns = predicted):
 - Expected items: 40
 
 Income detection is validated by the backend unit tests.
-
-## Phase 3 health score validation
-
-The five synthetic personas were scored with the pure metrics functions.
-Ordering checks passed: Priya scored above Rahul; Meera had the lowest credit
-utilisation or debt sub-score; Arjun had the lowest income-stability sub-score;
-and Sam had the lowest emergency-runway sub-score.
-
-Berka distribution counts (20 selected public accounts): minimum score 30.05,
-median score 60.15, maximum score 92.94, coverage below 0.5 for 0 accounts,
-zero-income accounts for 0 accounts, and runway available for 20 accounts.
-These values come from the local score validation command and contain no
-personal-user data.

@@ -22,6 +22,15 @@ def create_tables(target_engine=engine) -> None:
                 connection.exec_driver_sql(
                     "ALTER TABLE transactions ADD COLUMN is_self_transfer BOOLEAN NOT NULL DEFAULT 0"
                 )
+            user_columns = {row[1] for row in connection.exec_driver_sql("PRAGMA table_info(users)")}
+            if "email" not in user_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE users ADD COLUMN email VARCHAR(120)"
+                )
+            if "hashed_password" not in user_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE users ADD COLUMN hashed_password VARCHAR(256)"
+                )
 
 
 def get_db():

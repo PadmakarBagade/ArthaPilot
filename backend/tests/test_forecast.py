@@ -45,3 +45,15 @@ def test_stress_unknown_scenario_errors_and_income_stop_survives():
         stress_test(state, "unknown")
     result = stress_test(state, "income_stops_2_months", days=10, runs=100)
     assert result["survival_days"] == 10
+
+
+def test_forecast_backtest_runs():
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+    from backtest import run_backtest_for_persona
+    res = run_backtest_for_persona("rahul", holdout_days=10)
+    assert res
+    assert "mae_rupees" in res
+    assert "band_coverage_pct" in res
+

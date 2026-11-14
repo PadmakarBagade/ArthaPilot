@@ -16,6 +16,8 @@ class User(Base):
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     name: Mapped[str] = mapped_column(String(120))
+    email: Mapped[str | None] = mapped_column(String(120), unique=True, nullable=True, index=True)
+    hashed_password: Mapped[str | None] = mapped_column(String(256), nullable=True)
     persona_type: Mapped[str | None] = mapped_column(String(40), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     source: Mapped[str] = mapped_column(String(20), default="synthetic")
@@ -165,3 +167,14 @@ class ChatMessage(Base):
     answer_json: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     user: Mapped[User] = relationship(back_populates="chat_messages")
+
+
+class SessionToken(Base):
+    __tablename__ = "session_tokens"
+
+    token: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    user: Mapped[User] = relationship()
+

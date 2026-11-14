@@ -1,3 +1,4 @@
+from typing import Optional
 from datetime import date, datetime
 from typing import Any
 
@@ -11,6 +12,7 @@ class SchemaBase(BaseModel):
 class UserRead(SchemaBase):
     id: str
     name: str
+    email: str | None = None
     persona_type: str | None = None
     created_at: datetime
     source: str = "synthetic"
@@ -49,7 +51,7 @@ class LoanRead(SchemaBase):
     emi_paise: int
     rate_apr: float
     tenure_left_months: int
-    next_due_date: date | None = None
+    next_due_date: Optional[date] = None
 
 
 class CardRead(SchemaBase):
@@ -59,7 +61,7 @@ class CardRead(SchemaBase):
     balance_paise: int
     apr: float
     min_due_paise: int
-    due_date: date | None = None
+    due_date: Optional[date] = None
 
 
 class InvestmentRead(SchemaBase):
@@ -152,6 +154,34 @@ class GoalRequest(BaseModel):
     deadline: date
 
 
+class DebtPayoffRequest(BaseModel):
+    extra_monthly_paise: int = 0
+    strategy: str = "avalanche"
+
+
+class DebtPayoffResponse(BaseModel):
+    strategy: str
+    baseline_months: int
+    accelerated_months: int
+    months_saved: int
+    baseline_interest_paise: int
+    accelerated_interest_paise: int
+    interest_saved_paise: int
+    payoff_order: list[str]
+    formula: str
+    evidence_debt_ids: list[str]
+
+
+class InsightResponse(BaseModel):
+    type: str
+    title: str
+    message: str
+    severity: str
+    evidence_ids: list[str]
+    data: dict[str, Any]
+
+
+
 class TransactionCreate(BaseModel):
     date: date
     amount_paise: int
@@ -165,7 +195,7 @@ class LoanCreate(BaseModel):
     outstanding_paise: int
     emi_paise: int
     rate_apr: float = 0.0
-    next_due_date: date | None = None
+    next_due_date: Optional[date] = None
 
 
 class IncomeChange(BaseModel):
@@ -212,3 +242,113 @@ class ChatMessageRead(SchemaBase):
     content: str
     answer_json: dict[str, Any] | None = None
     created_at: datetime
+
+
+class UserRegisterRequest(BaseModel):
+    name: str
+    email: str
+    password: str
+    persona_type: str | None = None
+
+
+class UserLoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+class AuthUserResponse(SchemaBase):
+    id: str
+    name: str
+    email: str | None = None
+    persona_type: str | None = None
+    source: str = "user"
+    created_at: datetime
+
+
+class AuthResponse(BaseModel):
+    token: str
+    user: AuthUserResponse
+
+
+class CardRead(SchemaBase):
+    id: str
+    user_id: str
+    limit_paise: int
+    balance_paise: int
+    apr: float
+    min_due_paise: int
+    due_date: Optional[date] = None
+
+
+class CardCreate(BaseModel):
+    limit_paise: int
+    balance_paise: int
+    apr: float = 36.0
+    min_due_paise: int = 0
+    due_date: Optional[date] = None
+
+
+class InvestmentRead(SchemaBase):
+    id: str
+    user_id: str
+    type: str
+    value_paise: int
+    monthly_sip_paise: int = 0
+
+
+class InvestmentCreate(BaseModel):
+    type: str = "Mutual Fund SIP"
+    value_paise: int
+    monthly_sip_paise: int = 0
+
+
+
+class PersonaRead(BaseModel):
+    id: str
+    name: str
+    role: str
+    income: str
+    focus: str
+    scenario: str
+
+
+class CategorySpendItem(BaseModel):
+    category: str
+    amount_paise: int
+    percentage: float
+    count: int
+
+
+class MonthSpendItem(BaseModel):
+    month: str
+    income_paise: int
+    expense_paise: int
+    net_paise: int
+
+
+class SpendingBreakdownResponse(BaseModel):
+    user_id: str
+    total_spend_paise: int
+    total_income_paise: int
+    by_category: list[CategorySpendItem]
+    by_month: list[MonthSpendItem]
+
+
+class SnapshotRead(SchemaBase):
+    id: str
+    user_id: str
+    created_at: datetime
+    metrics_json: dict[str, Any]
+
+
+class EvidenceResolveResponse(BaseModel):
+    transactions: list[TransactionRead]
+    entities: dict[str, Any]
+    formulas: dict[str, Any]
+
+
+class ExpenseCreate(BaseModel):
+    amount_paise: int
+    category: str = "Shopping"
+    description: str = "Discretionary Expense"
+    date: Optional[date] = None
