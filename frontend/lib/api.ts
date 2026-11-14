@@ -106,6 +106,8 @@ export type Transaction = {
   category: string;
   category_confidence: number;
   is_recurring: boolean;
+  is_self_transfer?: boolean;
+  source?: string;
 };
 
 export type RecurringItem = {
@@ -449,4 +451,48 @@ export async function addInvestment(userId: string, investment: { type: string; 
   if (!response.ok) throw new Error(`Add investment failed (${response.status})`);
   return response.json();
 }
+
+export type CategorySpendItem = {
+  category: string;
+  amount_paise: number;
+  percentage: number;
+  count: number;
+};
+
+export type MonthSpendItem = {
+  month: string;
+  income_paise: number;
+  expense_paise: number;
+  net_paise: number;
+};
+
+export type SpendingBreakdown = {
+  user_id: string;
+  total_spend_paise: number;
+  total_income_paise: number;
+  by_category: CategorySpendItem[];
+  by_month: MonthSpendItem[];
+};
+
+export type UserOverview = {
+  user_id: string;
+  name: string;
+  health: Health;
+  confidence: Confidence;
+  best_move: BestMove | null;
+  next_gap: { date: string; probability: number } | null;
+  liquid_balance_paise: number;
+  debt_service_paise: number;
+  data_period: string;
+  last_updated: string;
+};
+
+export async function getOverview(userId: string): Promise<UserOverview> {
+  return getJson<UserOverview>(`/users/${encodeURIComponent(userId)}/overview`);
+}
+
+export async function getSpending(userId: string): Promise<SpendingBreakdown> {
+  return getJson<SpendingBreakdown>(`/users/${encodeURIComponent(userId)}/spending`);
+}
+
 

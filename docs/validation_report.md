@@ -100,3 +100,18 @@ Confusion matrix (rows = actual, columns = predicted):
 - Expected items: 40
 
 Income detection is validated by the backend unit tests.
+
+
+## Forecast backtesting
+
+30-day holdout backtesting across synthetic personas:
+- Overall 10-90 band coverage: 14.0% (target ~80%)
+- Overall Mean Absolute Error (MAE): ₹12,267.50
+
+| Persona | Holdout Days | MAE (₹) | 10-90 Band Coverage |
+|---|---:|---:|---:|
+| Rahul | 30 | ₹6,550.47 | 40.0% |
+| Priya | 30 | ₹12,424.17 | 6.67% |
+| Arjun | 30 | ₹15,335.16 | 6.67% |
+| Meera | 30 | ₹10,366.70 | 10.0% |
+| Sam | 30 | ₹16,661.00 | 6.67% |

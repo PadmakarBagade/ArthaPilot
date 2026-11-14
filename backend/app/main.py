@@ -1,5 +1,6 @@
 import csv
 import json
+from contextlib import asynccontextmanager
 from uuid import uuid4
 from datetime import date, datetime, timedelta, timezone
 from io import BytesIO
@@ -22,8 +23,10 @@ from .finance.defs import is_expense, is_income, liquid_balance_paise, monthly_d
 from .services import build_user_state, delete_user_data, list_demo_personas, reset_user, seed_demo
 from .schemas import (
     AffordabilityRequest,
+    AffordabilityResponse,
     AuthResponse,
     AuthUserResponse,
+    BestMovesResponse,
     CardCreate,
     CardRead,
     CategorySpendItem,
@@ -34,15 +37,18 @@ from .schemas import (
     EvidenceResolveResponse,
     ExpenseCreate,
     GoalRequest,
+    GoalResponse,
     HealthResponse,
     InsightResponse,
     InvestmentCreate,
     InvestmentRead,
+    LoanRead,
     MonthSpendItem,
     PersonaRead,
     ProcessResponse,
     RecurringItemRead,
     SimulationRequest,
+    SimulationResponse,
     SnapshotRead,
     SpendingBreakdownResponse,
     TransactionRead,
@@ -644,24 +650,24 @@ def debt_payoff_for_user(user_id: str, request: DebtPayoffRequest, db: Session =
 
 
 
-@app.post("/users/{user_id}/simulate")
+@app.post("/users/{user_id}/simulate", response_model=SimulationResponse)
 def simulate_for_user(user_id: str, request: SimulationRequest, db: Session = Depends(get_db)) -> dict:
     user = _require_user(user_id, db)
     action = request.model_dump(exclude_none=True)
     return simulate(_simulation_state(user), action)
 
 
-@app.get("/users/{user_id}/best-moves")
+@app.get("/users/{user_id}/best-moves", response_model=BestMovesResponse)
 def best_moves_for_user(user_id: str, db: Session = Depends(get_db)) -> dict:
     return rank_actions(_simulation_state(_require_user(user_id, db)))
 
 
-@app.post("/users/{user_id}/affordability")
+@app.post("/users/{user_id}/affordability", response_model=AffordabilityResponse)
 def affordability_for_user(user_id: str, request: AffordabilityRequest, db: Session = Depends(get_db)) -> dict:
     return affordability(_simulation_state(_require_user(user_id, db)), request.amount_paise)
 
 
-@app.post("/users/{user_id}/goal")
+@app.post("/users/{user_id}/goal", response_model=GoalResponse)
 def goal_for_user(user_id: str, request: GoalRequest, db: Session = Depends(get_db)) -> dict:
     return goal_plan(_simulation_state(_require_user(user_id, db)), request.target_paise, request.deadline)
 
@@ -731,22 +737,10 @@ def add_transaction(user_id: str, request: TransactionCreate, db: Session = Depe
     return transaction
 
 
-@app.get("/users/{user_id}/loans")
-def list_loans(user_id: str, db: Session = Depends(get_db)) -> list[dict]:
+@app.get("/users/{user_id}/loans", response_model=list[LoanRead])
+def list_loans(user_id: str, db: Session = Depends(get_db)) -> list[Loan]:
     user = _require_user(user_id, db)
-    return [
-        {
-            "id": loan.id,
-            "type": loan.type,
-            "principal_paise": loan.principal_paise,
-            "outstanding_paise": loan.outstanding_paise,
-            "emi_paise": loan.emi_paise,
-            "rate_apr": loan.rate_apr,
-            "tenure_left_months": loan.tenure_left_months,
-            "next_due_date": loan.next_due_date.isoformat() if loan.next_due_date else None,
-        }
-        for loan in user.loans
-    ]
+    return list(user.loans)
 
 
 @app.post("/users/{user_id}/loans")

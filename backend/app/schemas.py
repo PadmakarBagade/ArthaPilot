@@ -226,6 +226,61 @@ class GoalRead(SchemaBase):
     deadline: date
 
 
+class SimulationSummary(BaseModel):
+    income_paise: int
+    spend_paise: int
+    surplus_paise: int
+    savings_rate_pct: float
+    runway_months: float
+
+
+class SimulationDelta(BaseModel):
+    savings_rate_pct: float
+    runway_months: float
+    surplus_paise: int
+
+
+class SimulationResponse(BaseModel):
+    action: dict[str, Any]
+    before: SimulationSummary
+    after: SimulationSummary
+    delta: SimulationDelta
+    formula: str
+
+
+class BestMoveItem(BaseModel):
+    action: dict[str, Any]
+    impact_paise: int
+    effort_score: int
+    reason: str
+
+
+class BestMovesResponse(BaseModel):
+    best_move: Optional[BestMoveItem] = None
+    alternatives: list[BestMoveItem] = []
+    evidence_formula: str
+
+
+class AffordabilityResponse(BaseModel):
+    can_afford: bool
+    verdict: str
+    current_liquid_paise: int
+    after_purchase_balance_paise: int
+    safe_threshold_paise: int
+    monthly_surplus_paise: int
+    formula: str
+
+
+class GoalResponse(BaseModel):
+    target_paise: int
+    deadline: date
+    months: int
+    required_monthly_paise: int
+    feasible: bool
+    current_surplus_paise: int
+    formula: str
+
+
 class SnapshotRead(SchemaBase):
     id: str
     user_id: str
